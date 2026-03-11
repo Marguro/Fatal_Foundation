@@ -1,0 +1,28 @@
+{
+    "folderDatas": [
+        {
+            "key": "f0183beac392f90b4934da1315f6cce8",
+            "value": "ce272bdacc7d9bf4db9ed952b84b7f32"
+        },
+        {
+            "key": "21d4a4c7e98674e9fa66cfdacb2b1407",
+            "value": "80809a2ddb10dc942864489073ba50f8"
+        },
+        {
+            "key": "57fe3897f79148324978c3407e568ffa",
+            "value": "e0530e5cd023c6c42a538467e8f9c52e"
+        },
+        {
+            "key": "fa90e5f4199703c59ad01043ba128a4c",
+            "value": "80809a2ddb10dc942864489073ba50f8"
+        },
+        {
+            "key": "cd8557d14c0556539bb00f0cfa3ffc1b",
+            "value": "ce272bdacc7d9bf4db9ed952b84b7f32"
+        },
+        {
+            "key": "99ecb9dd66532745a8441c716dac60c5",
+            "value": "e0530e5cd023c6c42a538467e8f9c52e"
+        }
+    ]
+}
