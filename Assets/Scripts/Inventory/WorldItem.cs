@@ -12,15 +12,54 @@ namespace FatalFoundation
         [Tooltip("ลาก ItemData (ScriptableObject) มาใส่ที่นี่")]
         public ItemData itemData;
 
-        [Header("Visual Feedback (Optional)")]
-        [Tooltip("Outline หรือ Glow Effect — เปิด/ปิดเมื่อ Player มองมา (ไม่จำเป็น)")]
+        [Header("Visual Feedback")]
+        [Tooltip("Outline หรือ Glow Effect — เปิด/ปิดเมื่อ Player มองมา")]
         public GameObject highlightEffect;
+
+        [Header("Bob & Rotate Animation")]
+        [Tooltip("เปิดใช้แอนิเมชั่น ลอย + หมุน")]
+        public bool enableBobAnimation = true;
+
+        [Tooltip("ความสูงที่ไอเทมลอยขึ้น-ลง (เมตร)")]
+        public float bobHeight = 0.15f;
+
+        [Tooltip("ความเร็วการลอย")]
+        public float bobSpeed = 1.5f;
+
+        [Tooltip("ความเร็วการหมุน (องศา/วินาที)")]
+        public float rotateSpeed = 90f;
+
+        // ─── Private Fields ───────────────────────────────────────────────────
+        private Vector3 _startPosition;
+        private float _bobTimer;
+
+        // ─── Unity Lifecycle ──────────────────────────────────────────────────
+        private void Start()
+        {
+            _startPosition = transform.position;
+
+            // ซ่อน highlight เริ่มต้น
+            if (highlightEffect != null)
+                highlightEffect.SetActive(false);
+        }
+
+        private void Update()
+        {
+            if (!enableBobAnimation) return;
+
+            // ── Bob (ลอยขึ้น-ลง) ──
+            _bobTimer += Time.deltaTime * bobSpeed;
+            float newY = _startPosition.y + Mathf.Sin(_bobTimer) * bobHeight;
+            transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+
+            // ── Rotate ──
+            transform.Rotate(Vector3.up, rotateSpeed * Time.deltaTime, Space.World);
+        }
 
         // ─── Public Methods ───────────────────────────────────────────────────
 
         /// <summary>
         /// เรียกโดย InteractionSystem เมื่อ Player กด E
-        /// ลองเก็บไอเทมเข้า Inventory — ถ้าสำเร็จจะ Destroy GameObject นี้
         /// </summary>
         public void Interact()
         {
@@ -40,7 +79,6 @@ namespace FatalFoundation
 
             if (pickedUp)
             {
-                // ลบออกจาก Scene
                 Destroy(gameObject);
             }
             else
@@ -49,7 +87,9 @@ namespace FatalFoundation
             }
         }
 
-        /// <summary>เปิด/ปิด Highlight Effect (เรียกจาก InteractionSystem ถ้าต้องการ)</summary>
+        /// <summary>
+        /// เปิด/ปิด Highlight Effect — เรียกโดย InteractionSystem อัตโนมัติ
+        /// </summary>
         public void SetHighlight(bool active)
         {
             if (highlightEffect != null)
@@ -62,16 +102,13 @@ namespace FatalFoundation
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(transform.position, 0.3f);
 
-            if (itemData != null)
-            {
 #if UNITY_EDITOR
+            if (itemData != null)
                 UnityEditor.Handles.Label(
                     transform.position + Vector3.up * 0.5f,
                     $"{itemData.itemName}\n{itemData.weight}kg | ${itemData.scrapValue}"
                 );
 #endif
-            }
         }
     }
 }
-

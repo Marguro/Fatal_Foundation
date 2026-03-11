@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -20,24 +21,28 @@ namespace FatalFoundation
         public Camera playerCamera;
 
         [Tooltip("LayerMask สำหรับ Interactable Objects (แนะนำสร้าง Layer ชื่อ 'Interactable')")]
-        public LayerMask interactableLayer = ~0; // default = ทุก Layer
+        public LayerMask interactableLayer = ~0;
 
-        [Header("UI Prompt (Optional)")]
-        [Tooltip("GameObject ที่แสดงข้อความ 'Press E' — ถ้าไม่มีก็ไม่ต้องใส่")]
+        [Header("UI Prompt")]
+        [Tooltip("GameObject ที่มี Text แสดง 'Press E to pick up ...' — ถ้าไม่ใส่ก็ไม่มี prompt")]
         public GameObject interactPromptUI;
 
+        [Tooltip("Text component สำหรับแสดงชื่อไอเทม (ลากตัว Text ใน Prompt มาใส่)")]
+        public Text promptText;
+
+        [Tooltip("ข้อความ prefix ก่อนชื่อไอเทม เช่น 'กด E เพื่อเก็บ '")]
+        public string promptPrefix = "กด E เพื่อเก็บ ";
+
         // ─── Private Fields ───────────────────────────────────────────────────
-        private WorldItem _lookingAt; // ไอเทมที่กำลังมองอยู่
+        private WorldItem _lookingAt;
 
         // ─── Unity Lifecycle ──────────────────────────────────────────────────
         private void Start()
         {
-            // หา Camera อัตโนมัติถ้าไม่ได้ Assign
             if (playerCamera == null)
                 playerCamera = Camera.main;
 
-            if (interactPromptUI != null)
-                interactPromptUI.SetActive(false);
+            SetPromptVisible(false);
         }
 
         private void Update()
@@ -48,44 +53,69 @@ namespace FatalFoundation
 
         // ─── Interaction Logic ────────────────────────────────────────────────
 
-        /// <summary>
-        /// ยิง Raycast จาก Camera — ถ้าเจอ WorldItem แสดง Prompt
-        /// </summary>
         private void CheckForInteractable()
         {
             Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
             WorldItem found = null;
 
             if (Physics.Raycast(ray, out RaycastHit hit, interactionRange, interactableLayer))
-            {
                 found = hit.collider.GetComponent<WorldItem>();
-            }
 
-            // อัปเดต Prompt UI
+            // มีการเปลี่ยนแปลงไอเทมที่มองอยู่
             if (found != _lookingAt)
             {
+                // ปิด highlight ไอเทมเดิม
+                if (_lookingAt != null)
+                    _lookingAt.SetHighlight(false);
+
                 _lookingAt = found;
-                if (interactPromptUI != null)
-                    interactPromptUI.SetActive(_lookingAt != null);
+
+                // เปิด highlight ไอเทมใหม่ + แสดง prompt
+                if (_lookingAt != null)
+                {
+                    _lookingAt.SetHighlight(true);
+                    UpdatePromptText(_lookingAt.itemData);
+                    SetPromptVisible(true);
+                }
+                else
+                {
+                    SetPromptVisible(false);
+                }
             }
         }
 
-        /// <summary>
-        /// ตรวจสอบการกด E แล้วสั่ง Interact กับ WorldItem ที่มองอยู่
-        /// </summary>
         private void HandleInteractInput()
         {
-            bool interactPressed = false;
+            if (_lookingAt == null) return;
 
+            bool interactPressed = false;
 #if ENABLE_INPUT_SYSTEM
             if (Keyboard.current != null)
                 interactPressed = Keyboard.current.eKey.wasPressedThisFrame;
 #else
             interactPressed = Input.GetKeyDown(KeyCode.E);
 #endif
-
-            if (interactPressed && _lookingAt != null)
+            if (interactPressed)
                 _lookingAt.Interact();
+        }
+
+        // ─── UI Helpers ───────────────────────────────────────────────────────
+
+        private void UpdatePromptText(ItemData data)
+        {
+            if (promptText == null) return;
+
+            if (data != null)
+                promptText.text = $"{promptPrefix}<b>{data.itemName}</b>" +
+                                  (data.weight > 0f ? $"  ({data.weight}kg)" : "");
+            else
+                promptText.text = promptPrefix;
+        }
+
+        private void SetPromptVisible(bool visible)
+        {
+            if (interactPromptUI != null)
+                interactPromptUI.SetActive(visible);
         }
 
         // ─── Gizmos (Debug) ───────────────────────────────────────────────────
@@ -98,4 +128,3 @@ namespace FatalFoundation
         }
     }
 }
-
