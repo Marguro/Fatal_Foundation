@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using StarterAssets.InputSystem;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace StarterAssets.FirstPersonController.Scripts
@@ -42,12 +43,16 @@ namespace StarterAssets.FirstPersonController.Scripts
 		public LayerMask GroundLayers;
 
 		[Header("Cinemachine")]
-		[Tooltip("The follow target set in the Cinemachine Virtual Camera that the camera will follow")]
 		public GameObject CinemachineCameraTarget;
-		[Tooltip("How far in degrees can you move the camera up")]
 		public float TopClamp = 90.0f;
-		[Tooltip("How far in degrees can you move the camera down")]
 		public float BottomClamp = -90.0f;
+
+		[Header("Crouch")]
+		public float CrouchHeight = 1.0f;
+		public float StandHeight = 2.0f;
+		public float CrouchMoveSpeed = 2.0f;
+		public float CrouchTransitionSpeed = 10.0f;
+		public float CrouchCameraOffset = -0.5f;
 
 		// cinemachine
 		private float _cinemachineTargetPitch;
@@ -58,6 +63,10 @@ namespace StarterAssets.FirstPersonController.Scripts
 		private float _verticalVelocity;
 		private float _terminalVelocity = 53.0f;
 
+		// crouch
+		private bool _isCrouching;
+		private float _cameraStandLocalY;
+		private CharacterController _controller;
 		// timeout deltatime
 		private float _jumpTimeoutDelta;
 		private float _fallTimeoutDelta;
@@ -66,7 +75,6 @@ namespace StarterAssets.FirstPersonController.Scripts
 #if ENABLE_INPUT_SYSTEM
 		private PlayerInput _playerInput;
 #endif
-		private CharacterController _controller;
 		private StarterAssetsInputs _input;
 		private GameObject _mainCamera;
 
@@ -106,12 +114,14 @@ namespace StarterAssets.FirstPersonController.Scripts
 			// reset our timeouts on start
 			_jumpTimeoutDelta = JumpTimeout;
 			_fallTimeoutDelta = FallTimeout;
+			_cameraStandLocalY = CinemachineCameraTarget.transform.localPosition.y;
 		}
 
 		private void Update()
 		{
 			JumpAndGravity();
 			GroundedCheck();
+			Crouch();
 			Move();
 		}
 
@@ -152,7 +162,7 @@ namespace StarterAssets.FirstPersonController.Scripts
 		private void Move()
 		{
 			// set target speed based on move speed, sprint speed and if sprint is pressed
-			float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+			float targetSpeed = _isCrouching ? CrouchMoveSpeed : (_input.sprint ? SprintSpeed : MoveSpeed);
 
 			// a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -194,6 +204,21 @@ namespace StarterAssets.FirstPersonController.Scripts
 
 			// move the player
 			_controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+		}
+
+		private void Crouch()
+		{
+			_isCrouching = _input.crouch;
+
+			float targetHeight = _isCrouching ? CrouchHeight : StandHeight;
+			float targetCameraY = _isCrouching ? _cameraStandLocalY + CrouchCameraOffset : _cameraStandLocalY;
+
+			_controller.height = Mathf.Lerp(_controller.height, targetHeight, Time.deltaTime * CrouchTransitionSpeed);
+			_controller.center = new Vector3(_controller.center.x, _controller.height / 2f, _controller.center.z);
+
+			Vector3 camPos = CinemachineCameraTarget.transform.localPosition;
+			camPos.y = Mathf.Lerp(camPos.y, targetCameraY, Time.deltaTime * CrouchTransitionSpeed);
+			CinemachineCameraTarget.transform.localPosition = camPos;
 		}
 
 		private void JumpAndGravity()
