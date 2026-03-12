@@ -1,42 +1,32 @@
+using NaughtyAttributes;
 using UnityEngine;
-using UnityEngine.UI;
-#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
-#endif
+using UnityEngine.UI;
 
-namespace FatalFoundation
+namespace Inventory
 {
-    /// <summary>
-    /// ระบบ Interaction — กด E เพื่อเก็บไอเทมในโลก
-    /// ติดกับ Player GameObject
-    /// </summary>
     public class InteractionSystem : MonoBehaviour
     {
-        // ─── Inspector Fields ─────────────────────────────────────────────────
-        [Header("Interaction Settings")]
-        [Tooltip("ระยะ Raycast สำหรับตรวจจับไอเทม (เมตร)")]
+        [BoxGroup("Interaction Settings")]
         public float interactionRange = 3f;
 
-        [Tooltip("Camera ของ Player — ถ้าไม่ได้ลากมาจะหา MainCamera อัตโนมัติ")]
+        [BoxGroup("Interaction Settings")]
         public Camera playerCamera;
 
-        [Tooltip("LayerMask สำหรับ Interactable Objects (แนะนำสร้าง Layer ชื่อ 'Interactable')")]
+        [BoxGroup("Interaction Settings")]
         public LayerMask interactableLayer = ~0;
 
-        [Header("UI Prompt")]
-        [Tooltip("GameObject ที่มี Text แสดง 'Press E to pick up ...' — ถ้าไม่ใส่ก็ไม่มี prompt")]
+        [BoxGroup("UI Prompt")]
         public GameObject interactPromptUI;
 
-        [Tooltip("Text component สำหรับแสดงชื่อไอเทม (ลากตัว Text ใน Prompt มาใส่)")]
+        [BoxGroup("UI Prompt")]
         public Text promptText;
 
-        [Tooltip("ข้อความ prefix ก่อนชื่อไอเทม เช่น 'กด E เพื่อเก็บ '")]
-        public string promptPrefix = "กด E เพื่อเก็บ ";
+        [BoxGroup("UI Prompt")]
+        public string promptPrefix = "Press E to collect";
 
-        // ─── Private Fields ───────────────────────────────────────────────────
         private WorldItem _lookingAt;
 
-        // ─── Unity Lifecycle ──────────────────────────────────────────────────
         private void Start()
         {
             if (playerCamera == null)
@@ -51,7 +41,6 @@ namespace FatalFoundation
             HandleInteractInput();
         }
 
-        // ─── Interaction Logic ────────────────────────────────────────────────
 
         private void CheckForInteractable()
         {
@@ -61,16 +50,13 @@ namespace FatalFoundation
             if (Physics.Raycast(ray, out RaycastHit hit, interactionRange, interactableLayer))
                 found = hit.collider.GetComponent<WorldItem>();
 
-            // มีการเปลี่ยนแปลงไอเทมที่มองอยู่
             if (found != _lookingAt)
             {
-                // ปิด highlight ไอเทมเดิม
                 if (_lookingAt != null)
                     _lookingAt.SetHighlight(false);
 
                 _lookingAt = found;
 
-                // เปิด highlight ไอเทมใหม่ + แสดง prompt
                 if (_lookingAt != null)
                 {
                     _lookingAt.SetHighlight(true);
@@ -99,7 +85,6 @@ namespace FatalFoundation
                 _lookingAt.Interact();
         }
 
-        // ─── UI Helpers ───────────────────────────────────────────────────────
 
         private void UpdatePromptText(ItemData data)
         {
@@ -118,7 +103,6 @@ namespace FatalFoundation
                 interactPromptUI.SetActive(visible);
         }
 
-        // ─── Gizmos (Debug) ───────────────────────────────────────────────────
         private void OnDrawGizmosSelected()
         {
             if (playerCamera == null) return;

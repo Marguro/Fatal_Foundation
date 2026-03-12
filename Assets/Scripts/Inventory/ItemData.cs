@@ -1,36 +1,26 @@
 using UnityEngine;
+using NaughtyAttributes;
 
-namespace FatalFoundation
+namespace Inventory
 {
-    /// <summary>
-    /// ScriptableObject สำหรับเก็บข้อมูลของ Item ทุกชนิด
-    /// สร้างได้จาก Right-click > Create > FatalFoundation/ItemData
-    /// </summary>
     [CreateAssetMenu(fileName = "New ItemData", menuName = "FatalFoundation/ItemData")]
     public class ItemData : ScriptableObject
     {
-        [Header("Basic Info")]
-        [Tooltip("ชื่อของไอเทม")]
+        [BoxGroup("Basic Info")]
         public string itemName = "Unknown Item";
-
-        [Tooltip("ไอคอนที่แสดงใน UI Inventory")]
+        [BoxGroup("Basic Info")]
         public Sprite itemIcon;
 
-        [Header("Prefabs")]
-        [Tooltip("Prefab ที่ Spawn ในโลกเมื่อทิ้งไอเทม")]
+        [BoxGroup("Prefabs")]
         public GameObject worldPrefab;
-
-        [Tooltip("Prefab ที่แสดงในมือ Player")]
+        [BoxGroup("Prefabs")]
         public GameObject handPrefab;
 
-        [Header("Item Properties")]
-        [Tooltip("น้ำหนักของไอเทม — ส่งผลต่อความเร็วของ Player")]
+        [BoxGroup("Item Properties")]
         public float weight = 1f;
-
-        [Tooltip("มูลค่าเศษซาก (scrap value)")]
+        [BoxGroup("Item Properties")]
         public int scrapValue = 0;
-
-        [Tooltip("ถ้าเป็น True จะใช้สองมือ — ไม่สามารถสลับช่องได้จนกว่าจะทิ้ง")]
+        [BoxGroup("Item Properties")]
         public bool isTwoHanded = false;
     }
 }

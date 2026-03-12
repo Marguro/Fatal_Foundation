@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5be19c9377fa4090a183f3c45b0bfd88, type: 3}
-  m_Name: box
+  m_Name: Capsule
   m_EditorClassIdentifier: Assembly-CSharp::FatalFoundation.ItemData
-  itemName: Box
+  itemName: Capsule
   itemIcon: {fileID: 21300000, guid: 43adfe040c57e285cbea576976da100f, type: 3}
-  worldPrefab: {fileID: 5086836383171860173, guid: 635de0eda6d5e69699675353102cae26, type: 3}
-  handPrefab: {fileID: 7516312838741630293, guid: 1f1e3235e834cbee58931ef3d067d3b4, type: 3}
-  weight: 1
-  scrapValue: 10
-  isTwoHanded: 0
+  worldPrefab: {fileID: 3887083230440101244, guid: 737a6da2e2d31f5be8a925582f33e610, type: 3}
+  handPrefab: {fileID: 8011237782732846127, guid: 1c7a520267919277b8d10d07fc094d9b, type: 3}
+  weight: 5
+  scrapValue: 20
+  isTwoHanded: 1
