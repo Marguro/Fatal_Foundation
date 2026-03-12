@@ -20,7 +20,7 @@ MonoBehaviour:
       - Slow
     - QuestionId: Cheating
       Answers:
-      - CheatingImportant
+      - CheatingNotImportant
     - QuestionId: CostSensitivity
       Answers:
       - BestMargin
@@ -30,7 +30,7 @@ MonoBehaviour:
     - QuestionId: PlayerCount
       Answers:
       - 4
-  Preset: 1
+  Preset: 11
   SelectedSolutions:
     SelectedHostingModel: 1
     SelectedNetcodeSolution: 1

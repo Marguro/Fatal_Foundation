@@ -33,14 +33,25 @@ namespace Inventory
 
         private void Start()
         {
-            _inventory = PlayerInventory.Instance;
-
-            if (_inventory == null)
+            // PlayerInventory อาจยังไม่ spawn ตอนนี้ (Multiplayer: spawn หลัง StartHost/StartClient)
+            if (PlayerInventory.Instance != null)
             {
-                Debug.LogError("[InventoryUI] not found PlayerInventory.Instance — ตรวจสอบว่า PlayerInventory อยู่ใน Scene");
-                return;
+                BindInventory(PlayerInventory.Instance);
             }
+            else
+            {
+                // รอ event จาก PlayerInventory.OnNetworkSpawn เมื่อ local player spawn แล้ว
+                PlayerInventory.OnLocalInstanceReady += BindInventory;
+            }
+        }
 
+        // เรียกเมื่อ local player's inventory พร้อม — ทั้งกรณี spawn ก่อน/หลัง Start()
+        private void BindInventory(PlayerInventory inventory)
+        {
+            // unsubscribe ทันทีเพื่อป้องกัน memory leak
+            PlayerInventory.OnLocalInstanceReady -= BindInventory;
+
+            _inventory = inventory;
             _inventory.OnInventoryChanged += RefreshUI;
             _inventory.OnSlotChanged      += OnSlotChanged;
 
@@ -49,6 +60,9 @@ namespace Inventory
 
         private void OnDestroy()
         {
+            // ยกเลิก event ทั้งสองกรณีเพื่อป้องกัน leak
+            PlayerInventory.OnLocalInstanceReady -= BindInventory;
+
             if (_inventory != null)
             {
                 _inventory.OnInventoryChanged -= RefreshUI;
