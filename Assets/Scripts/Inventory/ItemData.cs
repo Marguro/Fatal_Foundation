@@ -19,9 +19,9 @@ namespace Inventory
         [BoxGroup("Item Properties")]
         public float weight = 1f;
         [BoxGroup("Item Properties")]
-        public int scrapValue = 0;
+        public int scrapValue;
         [BoxGroup("Item Properties")]
-        public bool isTwoHanded = false;
+        public bool isTwoHanded;
     }
 }
 

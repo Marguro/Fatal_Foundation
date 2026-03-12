@@ -9,23 +9,25 @@ namespace Inventory
     public class InventoryUI : MonoBehaviour
     {
         [BoxGroup("Slot Background Images (4 slots)")]
-        public Image[] slotBackgrounds = new Image[4];
+        [SerializeField] private Image[] slotBackgrounds = new Image[4];
 
         [BoxGroup("Item Icon Images (4 slots)")]
-        public Image[] itemIcons = new Image[4];
+        [SerializeField] private Image[] itemIcons = new Image[4];
 
         [BoxGroup("Slot Highlight Settings")]
-        public Color normalColor = new Color(1f, 1f, 1f, 0.5f);
+        [SerializeField] private Color normalColor = new Color(1f, 1f, 1f, 0.5f);
 
-        public Color selectedColor = new Color(1f, 0.9f, 0.2f, 1f);
+        [BoxGroup("Slot Highlight Settings")]
+        [SerializeField] private Color selectedColor = new Color(1f, 0.9f, 0.2f, 1f);
 
-        public float selectedScale = 1.15f;
+        [BoxGroup("Slot Highlight Settings")]
+        [SerializeField] private float selectedScale = 1.15f;
 
         [BoxGroup("Fade / Auto-hide Settings")]
-        public float displayDuration = 3f;
+        [SerializeField] private float displayDuration = 3f;
 
         [BoxGroup("Fade / Auto-hide Settings")]
-        public float fadeDuration = 0.5f;
+        [SerializeField] private float fadeDuration = 0.5f;
 
         private CanvasGroup _canvasGroup;
         private PlayerInventory _inventory;
@@ -43,7 +45,7 @@ namespace Inventory
 
             if (_inventory == null)
             {
-                Debug.LogError("[InventoryUI] ไม่พบ PlayerInventory.Instance — ตรวจสอบว่า PlayerInventory อยู่ใน Scene");
+                Debug.LogError("[InventoryUI] not found PlayerInventory.Instance — ตรวจสอบว่า PlayerInventory อยู่ใน Scene");
                 return;
             }
 

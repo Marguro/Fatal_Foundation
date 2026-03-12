@@ -8,22 +8,22 @@ namespace Inventory
     public class InteractionSystem : MonoBehaviour
     {
         [BoxGroup("Interaction Settings")]
-        public float interactionRange = 3f;
+        [SerializeField] private float interactionRange = 3f;
 
         [BoxGroup("Interaction Settings")]
-        public Camera playerCamera;
+        [SerializeField] private Camera playerCamera;
 
         [BoxGroup("Interaction Settings")]
-        public LayerMask interactableLayer = ~0;
+        [SerializeField] private LayerMask interactableLayer = ~0;
 
         [BoxGroup("UI Prompt")]
-        public GameObject interactPromptUI;
+        [SerializeField] private GameObject interactPromptUI;
 
         [BoxGroup("UI Prompt")]
-        public Text promptText;
+        [SerializeField] private Text promptText;
 
         [BoxGroup("UI Prompt")]
-        public string promptPrefix = "Press E to collect";
+        [SerializeField] private string promptPrefix = "Press E to collect";
 
         private WorldItem _lookingAt;
 

@@ -9,19 +9,19 @@ namespace Inventory
         public ItemData itemData;
 
         [BoxGroup("Visual Feedback")]
-        public GameObject highlightEffect;
+        [SerializeField] private GameObject highlightEffect;
 
         [BoxGroup("Bob & Rotate Animation")]
-        public bool enableBobAnimation = true;
+        [SerializeField] private bool enableBobAnimation = true;
 
         [BoxGroup("Bob & Rotate Animation")]
-        public float bobHeight = 0.15f;
+        [SerializeField] private float bobHeight = 0.15f;
 
         [BoxGroup("Bob & Rotate Animation")]
-        public float bobSpeed = 1.5f;
+        [SerializeField] private float bobSpeed = 1.5f;
 
         [BoxGroup("Bob & Rotate Animation")]
-        public float rotateSpeed = 90f;
+        [SerializeField] private float rotateSpeed = 90f;
 
         private Vector3 _startPosition;
         private float _bobTimer;

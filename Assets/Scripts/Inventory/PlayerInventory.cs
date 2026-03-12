@@ -2,6 +2,7 @@ using StarterAssets;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using NaughtyAttributes;
+using StarterAssets.FirstPersonController.Scripts;
 
 namespace Inventory
 {
@@ -10,16 +11,16 @@ namespace Inventory
         public static PlayerInventory Instance { get; private set; }
 
         [BoxGroup("Hand Anchor")]
-        public Transform handAnchor;
+        [SerializeField] private Transform handAnchor;
 
         [BoxGroup("Weight Settings")]
-        public float weightMultiplier = 0.5f;
+        [SerializeField] private float weightMultiplier = 0.5f;
         [BoxGroup("Weight Settings")]
-        public float minMoveSpeed = 0.5f;
+        [SerializeField] private float minMoveSpeed = 0.5f;
 
-        private const int SLOT_COUNT = 4;
-        private ItemData[] _slots = new ItemData[SLOT_COUNT];
-        private int _currentSlotIndex = 0;
+        private const int SlotCount = 4;
+        private ItemData[] _slots = new ItemData[SlotCount];
+        private int _currentSlotIndex;
         private GameObject _currentHandObject;
 
         private FirstPersonController _fpsController;
@@ -113,7 +114,7 @@ namespace Inventory
                 return;
             }
 
-            newIndex = ((newIndex % SLOT_COUNT) + SLOT_COUNT) % SLOT_COUNT;
+            newIndex = ((newIndex % SlotCount) + SlotCount) % SlotCount;
 
             if (newIndex == _currentSlotIndex) return;
 
