@@ -11,6 +11,7 @@ namespace Inventory
         [SerializeField] private float interactionRange = 3f;
 
         [BoxGroup("Interaction Settings")]
+        [Required("Insert MainCamera to this")]
         [SerializeField] private Camera playerCamera;
 
         [BoxGroup("Interaction Settings")]

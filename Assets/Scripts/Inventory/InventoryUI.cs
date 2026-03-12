@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using NaughtyAttributes;
@@ -23,20 +22,13 @@ namespace Inventory
         [BoxGroup("Slot Highlight Settings")]
         [SerializeField] private float selectedScale = 1.15f;
 
-        [BoxGroup("Fade / Auto-hide Settings")]
-        [SerializeField] private float displayDuration = 3f;
-
-        [BoxGroup("Fade / Auto-hide Settings")]
-        [SerializeField] private float fadeDuration = 0.5f;
-
         private CanvasGroup _canvasGroup;
         private PlayerInventory _inventory;
-        private Coroutine _fadeCoroutine;
 
         private void Awake()
         {
             _canvasGroup = GetComponent<CanvasGroup>();
-            _canvasGroup.alpha = 0f; // ซ่อน UI ตั้งแต่เริ่ม
+            _canvasGroup.alpha = 1f;
         }
 
         private void Start()
@@ -67,14 +59,12 @@ namespace Inventory
         private void OnSlotChanged(int index)
         {
             UpdateSlotHighlights();
-            ShowUI();
         }
 
         private void RefreshUI()
         {
             UpdateItemIcons();
             UpdateSlotHighlights();
-            ShowUI();
         }
 
         private void UpdateItemIcons()
@@ -104,34 +94,9 @@ namespace Inventory
                 if (slotBackgrounds[i] == null) continue;
 
                 bool isSelected = (i == _inventory.CurrentSlotIndex);
-                slotBackgrounds[i].color                    = isSelected ? selectedColor : normalColor;
-                slotBackgrounds[i].transform.localScale     = Vector3.one * (isSelected ? selectedScale : 1f);
+                slotBackgrounds[i].color                = isSelected ? selectedColor : normalColor;
+                slotBackgrounds[i].transform.localScale = Vector3.one * (isSelected ? selectedScale : 1f);
             }
-        }
-
-        private void ShowUI()
-        {
-            if (_fadeCoroutine != null) StopCoroutine(_fadeCoroutine);
-            _fadeCoroutine = StartCoroutine(ShowAndFadeCoroutine());
-        }
-
-        private IEnumerator ShowAndFadeCoroutine()
-        {
-            _canvasGroup.alpha = 1f;
-
-            yield return new WaitForSeconds(displayDuration);
-
-            float elapsed = 0f;
-            while (elapsed < fadeDuration)
-            {
-                elapsed            += Time.deltaTime;
-                _canvasGroup.alpha  = Mathf.Lerp(1f, 0f, elapsed / fadeDuration);
-                yield return null;
-            }
-
-            _canvasGroup.alpha = 0f;
-            _fadeCoroutine     = null;
         }
     }
 }
-

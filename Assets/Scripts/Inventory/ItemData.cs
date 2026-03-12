@@ -9,11 +9,14 @@ namespace Inventory
         [BoxGroup("Basic Info")]
         public string itemName = "Unknown Item";
         [BoxGroup("Basic Info")]
+        [ShowAssetPreview]
         public Sprite itemIcon;
 
         [BoxGroup("Prefabs")]
+        [ShowAssetPreview]
         public GameObject worldPrefab;
         [BoxGroup("Prefabs")]
+        [ShowAssetPreview]
         public GameObject handPrefab;
 
         [BoxGroup("Item Properties")]
