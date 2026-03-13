@@ -1,9 +1,11 @@
 using NaughtyAttributes;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Inventory
 {
-    public class WorldItem : MonoBehaviour
+    [RequireComponent(typeof(NetworkObject))]
+    public class WorldItem : NetworkBehaviour
     {
         [BoxGroup("Item Data")]
         public ItemData itemData;
@@ -26,12 +28,16 @@ namespace Inventory
         private Vector3 _startPosition;
         private float _bobTimer;
 
+        public override void OnNetworkSpawn()
+        {
+            if (highlightEffect != null)
+                highlightEffect.SetActive(false);
+        }
+
         private void Start()
         {
             _startPosition = transform.position;
-
-            if (highlightEffect != null)
-                highlightEffect.SetActive(false);
+            // Highlight disabled in OnNetworkSpawn or here is fine
         }
 
         private void Update()
@@ -47,28 +53,25 @@ namespace Inventory
 
         public void Interact()
         {
-            if (itemData == null)
+            if (itemData == null) return;
+            
+            // Client-side prediction / Local pickup logic
+            if (PlayerInventory.Instance != null)
             {
-                Debug.LogWarning($"[WorldItem] {gameObject.name} ไม่มี ItemData — กรุณา Assign ใน Inspector");
-                return;
+               bool pickedUp = PlayerInventory.Instance.PickUpItem(itemData);
+               if (pickedUp)
+               {
+                   // Request server to despawn this object
+                   RequestDespawnServerRpc();
+               }
             }
+        }
 
-            if (PlayerInventory.Instance == null)
-            {
-                Debug.LogWarning("[WorldItem] ไม่พบ PlayerInventory.Instance ใน Scene");
-                return;
-            }
-
-            bool pickedUp = PlayerInventory.Instance.PickUpItem(itemData);
-
-            if (pickedUp)
-            {
-                Destroy(gameObject);
-            }
-            else
-            {
-                Debug.Log($"[WorldItem] กระเป๋าเต็ม ไม่สามารถเก็บ '{itemData.itemName}' ได้");
-            }
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestDespawnServerRpc()
+        {
+            // Server validates and despawns
+            GetComponent<NetworkObject>().Despawn();
         }
         
         public void SetHighlight(bool active)

@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using NaughtyAttributes;
 using StarterAssets.FirstPersonController.Scripts;
+using Unity.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Inventory
 {
@@ -18,6 +21,11 @@ namespace Inventory
 
         [BoxGroup("Hand Anchor")]
         [SerializeField] private Transform handAnchor;
+
+        [BoxGroup("Items Database")]
+        [SerializeField] private List<ItemData> allGameItems = new List<ItemData>();
+
+        private readonly NetworkVariable<FixedString64Bytes> _netCurrentItemName = new NetworkVariable<FixedString64Bytes>();
 
         [BoxGroup("Weight Settings")]
         [SerializeField] private float weightMultiplier = 0.5f;
@@ -58,8 +66,14 @@ namespace Inventory
         // ทำงานก่อน Start() จึงปลอดภัยกว่า Awake สำหรับการเช็ค ownership
         public override void OnNetworkSpawn()
         {
+            _netCurrentItemName.OnValueChanged += OnHeldItemChanged;
+
             if (!IsOwner)
             {
+                // Sync initial state for late joiners
+                if (!_netCurrentItemName.Value.IsEmpty)
+                    UpdateRemoteHandVisual(_netCurrentItemName.Value.ToString());
+
                 // Remote player: ปิด component นี้ — ไม่ต้องรัน Update, Start ฯลฯ
                 enabled = false;
                 return;
@@ -84,8 +98,35 @@ namespace Inventory
 
         public override void OnNetworkDespawn()
         {
+            _netCurrentItemName.OnValueChanged -= OnHeldItemChanged;
             if (IsOwner && Instance == this)
                 Instance = null;
+        }
+
+        private void OnHeldItemChanged(FixedString64Bytes oldName, FixedString64Bytes newName)
+        {
+            if (IsOwner) return; // Owner handles visuals locally for responsiveness
+            UpdateRemoteHandVisual(newName.ToString());
+        }
+
+        private void UpdateRemoteHandVisual(string itemName)
+        {
+            if (_currentHandObject != null) Destroy(_currentHandObject);
+            if (string.IsNullOrEmpty(itemName)) return;
+
+            ItemData data = allGameItems.FirstOrDefault(i => i.itemName == itemName);
+            if (data != null && data.handPrefab != null)
+            {
+                _currentHandObject = Instantiate(data.handPrefab, handAnchor);
+                _currentHandObject.transform.localPosition = Vector3.zero;
+                _currentHandObject.transform.localRotation = Quaternion.identity;
+            }
+        }
+        
+        [ServerRpc]
+        private void UpdateHeldItemServerRpc(string newItemName)
+        {
+            _netCurrentItemName.Value = newItemName;
         }
 
         // Start ถูกลบ — ย้าย logic ไปที่ OnNetworkSpawn แล้ว
@@ -161,13 +202,28 @@ namespace Inventory
             ItemData droppedItem = _slots[_currentSlotIndex];
             if (droppedItem.worldPrefab != null)
             {
-                Vector3 dropPos = transform.position + transform.forward * 1.5f;
-                Instantiate(droppedItem.worldPrefab, dropPos, Quaternion.identity);
+                // Request server to spawn the item
+                RequestDropItemServerRpc(droppedItem.itemName);
             }
 
             _slots[_currentSlotIndex] = null;
             UpdateHandItem();
             OnInventoryChanged?.Invoke();
+        }
+
+        [ServerRpc]
+        private void RequestDropItemServerRpc(string itemName)
+        {
+             ItemData data = allGameItems.FirstOrDefault(i => i.itemName == itemName);
+             if (data != null && data.worldPrefab != null)
+             {
+                 Vector3 dropPos = transform.position + transform.forward * 1.5f;
+                 GameObject spawnedItem = Instantiate(data.worldPrefab, dropPos, Quaternion.identity);
+                 if (spawnedItem.TryGetComponent(out NetworkObject netObj))
+                 {
+                     netObj.Spawn();
+                 }
+             }
         }
 
         private void UpdateHandItem()
@@ -176,13 +232,42 @@ namespace Inventory
                 Destroy(_currentHandObject);
 
             ItemData currentItem = _slots[_currentSlotIndex];
-            if (currentItem != null && currentItem.handPrefab != null && handAnchor != null)
+            string itemName = "";
+            
+            if (currentItem != null)
             {
-                _currentHandObject = Instantiate(currentItem.handPrefab, handAnchor);
-                _currentHandObject.transform.localPosition = Vector3.zero;
-                _currentHandObject.transform.localRotation = Quaternion.identity;
+                itemName = currentItem.itemName;
+                if (currentItem.handPrefab != null && handAnchor != null)
+                {
+                    _currentHandObject = Instantiate(currentItem.handPrefab, handAnchor);
+                    _currentHandObject.transform.localPosition = Vector3.zero;
+                    _currentHandObject.transform.localRotation = Quaternion.identity;
+                }
+            }
+            
+            if (IsOwner)
+            {
+                UpdateHeldItemServerRpc(itemName);
             }
         }
+        
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            // Auto-populate items for convenience
+            if (allGameItems == null || allGameItems.Count == 0)
+            {
+                var guids = UnityEditor.AssetDatabase.FindAssets("t:ItemData");
+                allGameItems = new List<ItemData>();
+                foreach (var guid in guids)
+                {
+                    string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                    var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<ItemData>(path);
+                    if (asset != null) allGameItems.Add(asset);
+                }
+            }
+        }
+#endif
 
         private void ApplyWeightPenalty()
         {
