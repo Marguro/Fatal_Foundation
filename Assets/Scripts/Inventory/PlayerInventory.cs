@@ -1,4 +1,3 @@
-using StarterAssets;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -10,13 +9,10 @@ using System.Linq;
 
 namespace Inventory
 {
-    // เปลี่ยนจาก MonoBehaviour เป็น NetworkBehaviour เพื่อใช้ IsOwner / OnNetworkSpawn
     public class PlayerInventory : NetworkBehaviour
     {
-        /// <summary>Instance ของผู้เล่นบนเครื่องนี้เท่านั้น (IsOwner)</summary>
         public static PlayerInventory Instance { get; private set; }
 
-        /// <summary>ถูก invoke เมื่อ local player's inventory พร้อมใช้งาน</summary>
         public static event System.Action<PlayerInventory> OnLocalInstanceReady;
 
         [BoxGroup("Hand Anchor")]
@@ -58,32 +54,22 @@ namespace Inventory
         public event System.Action OnInventoryChanged;
         public event System.Action<int> OnSlotChanged;
 
-        // Awake: ไม่ตั้ง singleton ที่นี่อีกต่อไป
-        // (เดิมมี Destroy(gameObject) ซึ่งจะทำลาย remote player ทันที)
-        private void Awake() { /* slots initialized by field initializer */ }
-
-        // NGO เรียก OnNetworkSpawn หลัง NetworkObject spawn
-        // ทำงานก่อน Start() จึงปลอดภัยกว่า Awake สำหรับการเช็ค ownership
         public override void OnNetworkSpawn()
         {
             _netCurrentItemName.OnValueChanged += OnHeldItemChanged;
 
             if (!IsOwner)
             {
-                // Sync initial state for late joiners
                 if (!_netCurrentItemName.Value.IsEmpty)
                     UpdateRemoteHandVisual(_netCurrentItemName.Value.ToString());
 
-                // Remote player: ปิด component นี้ — ไม่ต้องรัน Update, Start ฯลฯ
                 enabled = false;
                 return;
             }
 
-            // Local owner player: ลงทะเบียน singleton และแจ้ง InventoryUI
             Instance = this;
             OnLocalInstanceReady?.Invoke(this);
 
-            // เตรียม weight system (เดิมอยู่ใน Start)
             _fpsController = GetComponent<FirstPersonController>();
             if (_fpsController != null)
             {
@@ -105,7 +91,7 @@ namespace Inventory
 
         private void OnHeldItemChanged(FixedString64Bytes oldName, FixedString64Bytes newName)
         {
-            if (IsOwner) return; // Owner handles visuals locally for responsiveness
+            if (IsOwner) return;
             UpdateRemoteHandVisual(newName.ToString());
         }
 
@@ -129,8 +115,6 @@ namespace Inventory
             _netCurrentItemName.Value = newItemName;
         }
 
-        // Start ถูกลบ — ย้าย logic ไปที่ OnNetworkSpawn แล้ว
-        // Update ทำงานเฉพาะเมื่อ enabled = true (owner เท่านั้น)
         private void Update()
         {
             HandleScrollInput();
@@ -202,7 +186,6 @@ namespace Inventory
             ItemData droppedItem = _slots[_currentSlotIndex];
             if (droppedItem.worldPrefab != null)
             {
-                // Request server to spawn the item
                 RequestDropItemServerRpc(droppedItem.itemName);
             }
 
@@ -254,7 +237,6 @@ namespace Inventory
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            // Auto-populate items for convenience
             if (allGameItems == null || allGameItems.Count == 0)
             {
                 var guids = UnityEditor.AssetDatabase.FindAssets("t:ItemData");
