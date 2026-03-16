@@ -1,6 +1,7 @@
 ﻿using StarterAssets.InputSystem;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Systems;
 
 namespace StarterAssets.FirstPersonController.Scripts
 {
@@ -70,8 +71,9 @@ namespace StarterAssets.FirstPersonController.Scripts
 		// timeout deltatime
 		private float _jumpTimeoutDelta;
 		private float _fallTimeoutDelta;
+		
+		private StaminaSystem _staminaSystem;
 
-	
 #if ENABLE_INPUT_SYSTEM
 		private PlayerInput _playerInput;
 #endif
@@ -105,6 +107,7 @@ namespace StarterAssets.FirstPersonController.Scripts
 		{
 			_controller = GetComponent<CharacterController>();
 			_input = GetComponent<StarterAssetsInputs>();
+			_staminaSystem = GetComponent<StaminaSystem>();
 #if ENABLE_INPUT_SYSTEM
 			_playerInput = GetComponent<PlayerInput>();
 #else
@@ -162,7 +165,17 @@ namespace StarterAssets.FirstPersonController.Scripts
 		private void Move()
 		{
 			// set target speed based on move speed, sprint speed and if sprint is pressed
-			float targetSpeed = _isCrouching ? CrouchMoveSpeed : (_input.sprint ? SprintSpeed : MoveSpeed);
+            bool isSprinting = _input.sprint;
+
+            if (isSprinting && _input.move != Vector2.zero && _staminaSystem != null)
+            {
+                if (!_staminaSystem.TryConsumeStaminaContinuous(_staminaSystem.SprintCostPerSecond))
+                {
+                    isSprinting = false;
+                }
+            }
+
+			float targetSpeed = _isCrouching ? CrouchMoveSpeed : (isSprinting ? SprintSpeed : MoveSpeed);
 
 			// a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 

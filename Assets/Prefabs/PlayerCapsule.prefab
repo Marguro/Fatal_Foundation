@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 8478105761366780714}
   - component: {fileID: 1955954487685726740}
   - component: {fileID: 7749060380058493648}
+  - component: {fileID: 2155087426466563239}
+  - component: {fileID: 2258510986131091859}
   m_Layer: 8
   m_Name: PlayerCapsule
   m_TagString: Player
@@ -278,6 +280,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FatalFoundation.PlayerInventory
   ShowTopMostFoldoutHeaderGroup: 1
   handAnchor: {fileID: 7474705619174202243}
+  allGameItems:
+  - {fileID: 11400000, guid: 70e7c700d1fbc63858f826ed4b793e3a, type: 2}
+  - {fileID: 11400000, guid: 4ae0f3a5e546d1ec189e07a9f38de9ab, type: 2}
   weightMultiplier: 0.5
   minMoveSpeed: 0.5
 --- !u!114 &8478105761366780714
@@ -365,6 +370,51 @@ MonoBehaviour:
   playerInventory: {fileID: 6932498809128189027}
   interactionSystem: {fileID: 8478105761366780714}
   playerFollowCamera: {fileID: 3170168950744598181}
+--- !u!114 &2155087426466563239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2153596515888635933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80343240822b4bddbd9eaefff036dc53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Systems.HealthSystem
+  ShowTopMostFoldoutHeaderGroup: 1
+  maxHealth: 100
+  destroyOnDeath: 1
+  debugLogs: 0
+  CurrentHealth:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
+--- !u!114 &2258510986131091859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2153596515888635933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58a69fc71dd640d3bb3bc3c02fcc70ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Systems.StaminaSystem
+  ShowTopMostFoldoutHeaderGroup: 1
+  maxStamina: 100
+  staminaRegenRate: 10
+  sprintCostPerSecond: 20
+  jumpCost: 15
+  regenDelay: 2
+  debugLogs: 0
+  CurrentStamina:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
 --- !u!1 &3170168950744598181
 GameObject:
   m_ObjectHideFlags: 0
