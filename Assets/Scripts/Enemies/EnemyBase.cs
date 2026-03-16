@@ -84,6 +84,17 @@ namespace Enemies
         protected virtual void OnDeath()
         {
             // Optional: shared death logic (e.g., sound, particle)
+            if (IsServer)
+            {
+                // Unsubscribe to prevent errors
+                if (Health != null) Health.OnDeath -= OnDeath;
+
+                // Disable Agent to prevent NavMeshAgentInspector errors when destroyed
+                if (Agent != null) Agent.enabled = false;
+
+                // Note: We removed Despawn/Destroy here because HealthSystem handles destruction
+                // via the 'destroyOnDeath' flag to avoid double-destruction errors.
+            }
         }
     }
 }

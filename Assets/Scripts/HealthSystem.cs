@@ -82,8 +82,14 @@ public class HealthSystem : NetworkBehaviour
         // Custom death logic here or via event
         if (destroyOnDeath && IsServer)
         {
-            // Optional: NetworkObject.Despawn(); 
-            // Careful with destroying players
+            if (TryGetComponent(out NetworkObject netObj))
+            {
+                netObj.Despawn(true);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }
