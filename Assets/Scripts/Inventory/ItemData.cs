@@ -25,6 +25,12 @@ namespace Inventory
         public int scrapValue;
         [BoxGroup("Item Properties")]
         public bool isTwoHanded;
+
+        public virtual bool Use(GameObject character)
+        {
+            Debug.Log($"Using item: {itemName}");
+            return false;
+        }
     }
 }
 

@@ -20,7 +20,6 @@ namespace Inventory
 
         [BoxGroup("Items Database")]
         [SerializeField] private List<ItemData> allGameItems = new List<ItemData>();
-
         private readonly NetworkVariable<FixedString64Bytes> _netCurrentItemName = new NetworkVariable<FixedString64Bytes>();
 
         [BoxGroup("Weight Settings")]
@@ -119,7 +118,20 @@ namespace Inventory
         {
             HandleScrollInput();
             HandleDropInput();
+            HandleUseInput();
             ApplyWeightPenalty();
+        }
+
+        private void HandleUseInput()
+        {
+            bool usePressed = false;
+#if ENABLE_INPUT_SYSTEM
+            if (Mouse.current != null)
+                usePressed = Mouse.current.leftButton.wasPressedThisFrame;
+#else
+            usePressed = Input.GetMouseButtonDown(0);
+#endif
+            if (usePressed) UseCurrentItem();
         }
 
         private void HandleScrollInput()
@@ -194,18 +206,100 @@ namespace Inventory
             OnInventoryChanged?.Invoke();
         }
 
+        public void UseCurrentItem()
+        {
+            if (_slots[_currentSlotIndex] == null) return;
+
+            // Use locally (Owner/Client Auth logic + Visuals)
+            bool consumed = _slots[_currentSlotIndex].Use(gameObject);
+
+            // Use on server (Server Auth logic)
+            // If Host (IsServer + IsOwner), local Use already ran both logics.
+            if (!IsServer)
+            {
+                UseItemServerRpc(_slots[_currentSlotIndex].itemName);
+            }
+
+            if (consumed)
+            {
+                _slots[_currentSlotIndex] = null;
+                UpdateHandItem();
+                OnInventoryChanged?.Invoke();
+            }
+        }
+
+        [ServerRpc]
+        private void UseItemServerRpc(string itemName)
+        {
+            // If Host, we already used it locally.
+            if (IsOwner) return;
+
+            ItemData item = allGameItems.FirstOrDefault(i => i.itemName == itemName);
+            if (item != null)
+            {
+                item.Use(gameObject);
+            }
+        }
+
         [ServerRpc]
         private void RequestDropItemServerRpc(string itemName)
         {
              ItemData data = allGameItems.FirstOrDefault(i => i.itemName == itemName);
              if (data != null && data.worldPrefab != null)
              {
-                 Vector3 dropPos = transform.position + transform.forward * 1.5f;
-                 GameObject spawnedItem = Instantiate(data.worldPrefab, dropPos, Quaternion.identity);
-                 if (spawnedItem.TryGetComponent(out NetworkObject netObj))
+             Vector3 dropPos = transform.position + transform.forward * 1.0f + Vector3.up * 1.5f; // Drop from higher position
+             GameObject spawnedItem = Instantiate(data.worldPrefab, dropPos, Quaternion.identity);
+             
+             // Check if registered in NetworkManager (Host check)
+             bool isRegistered = false;
+             if (NetworkManager.Singleton != null && NetworkManager.Singleton.NetworkConfig != null)
+             {
+                 var collection = NetworkManager.Singleton.NetworkConfig.Prefabs;
+                 // This check is a bit complex due to different ways to register, but simple list check helps
+                 // We can check if the hash or prefab is in the list.
+                 // For now, let's just warn if the list is empty or small.
+                 if (collection.Prefabs.Count == 0)
+                 {
+                     Debug.LogError("[PlayerInventory] NetworkManager has NO registered prefabs! Dropped item will not spawn on clients.");
+                 }
+             }
+
+             // Auto-fix for 2D sprites wanting to live in 3D world
+             if (spawnedItem.GetComponent<SpriteRenderer>() != null)
+             {
+                 // Add Billboard if missing
+                 if (spawnedItem.GetComponent<Billboard>() == null)
+                 {
+                     spawnedItem.AddComponent<Billboard>();
+                 }
+
+                 // Warn about collider
+                 var col3D = spawnedItem.GetComponent<Collider>();
+                 var col2D = spawnedItem.GetComponent<Collider2D>();
+                 
+                 if (col2D != null)
+                 {
+                      Debug.LogError($"[PlayerInventory] Item '{itemName}' has a 2D Collider! It will fall through the 3D ground. PLEASE REMOVE Collider2D and add a BoxCollider (3D) or SphereCollider (3D).");
+                 }
+                 else if (col3D == null)
+                 {
+                      Debug.LogWarning($"[PlayerInventory] Item '{itemName}' has NO Collider! It will fall through the ground.");
+                 }
+             }
+
+             if (spawnedItem.TryGetComponent(out NetworkObject netObj))
+             {
+                 try
                  {
                      netObj.Spawn();
+                     Debug.Log($"[PlayerInventory] Successfully spawned '{itemName}' at {dropPos}");
                  }
+                 catch (System.Exception e)
+                 {
+                     Debug.LogError($"[PlayerInventory] FAILED to spawn '{itemName}'. Is the prefab registered in NetworkManager? Error: {e.Message}");
+                     Destroy(spawnedItem); // Cleanup ghost
+                 }
+             }
              }
         }
 

@@ -90,6 +90,16 @@ public class StaminaSystem : NetworkBehaviour
         return TryConsumeStamina(amount);
     }
 
+    /// <summary>
+    /// Restore stamina (e.g. from food/items).
+    /// </summary>
+    public void RestoreStamina(float amount)
+    {
+        if (!IsOwner) return;
+
+        currentStamina.Value = Mathf.Clamp(currentStamina.Value + amount, 0, maxStamina);
+    }
+
     public bool CanConsumeStamina(float amount)
     {
         return currentStamina.Value >= amount;

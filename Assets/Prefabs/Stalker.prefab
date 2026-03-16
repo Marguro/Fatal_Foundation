@@ -218,7 +218,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemies.StalkerAI
   ShowTopMostFoldoutHeaderGroup: 1
   stareDuration: 10
-  heavyAttackDamage: 100
+  heavyAttackDamage: 50
   fleeDistance: 15
   fleeSpeed: 6
   huntSpeed: 3.5

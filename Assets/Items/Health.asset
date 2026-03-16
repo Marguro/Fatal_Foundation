@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20b8cc66a2bc47e7b996d89ab959ced4, type: 3}
+  m_Name: Health
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.ConsumableItemData
+  itemName: Steak
+  itemIcon: {fileID: 21300000, guid: 666b87a48ba869542aeb448c32949241, type: 3}
+  worldPrefab: {fileID: 8695509015078978454, guid: b979ba55c67e8194390e0b7ef7266cba, type: 3}
+  handPrefab: {fileID: 2554358217172350297, guid: b71f28f3e157e0345af4efc6e02fc5dd, type: 3}
+  weight: 0
+  scrapValue: 0
+  isTwoHanded: 0
+  healAmount: 10
+  staminaAmount: 0
+  consumeSound: {fileID: 0}
+  consumeVFX: {fileID: 0}
