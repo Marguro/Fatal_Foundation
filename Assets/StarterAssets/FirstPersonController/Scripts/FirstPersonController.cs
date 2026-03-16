@@ -1,7 +1,6 @@
 ﻿using StarterAssets.InputSystem;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Systems;
 
 namespace StarterAssets.FirstPersonController.Scripts
 {
