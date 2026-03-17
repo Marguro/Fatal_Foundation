@@ -283,6 +283,8 @@ MonoBehaviour:
   allGameItems:
   - {fileID: 11400000, guid: 70e7c700d1fbc63858f826ed4b793e3a, type: 2}
   - {fileID: 11400000, guid: 4ae0f3a5e546d1ec189e07a9f38de9ab, type: 2}
+  - {fileID: 11400000, guid: 68ecd54ddf9bb97e481cadb6743e56ae, type: 2}
+  - {fileID: 11400000, guid: ff20a3aeabbbaf64399ce1c06f8a7e12, type: 2}
   weightMultiplier: 0.5
   minMoveSpeed: 0.5
 --- !u!114 &8478105761366780714
@@ -386,7 +388,7 @@ MonoBehaviour:
   maxHealth: 100
   destroyOnDeath: 1
   debugLogs: 0
-  CurrentHealth:
+  currentHealth:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
@@ -407,10 +409,9 @@ MonoBehaviour:
   maxStamina: 100
   staminaRegenRate: 10
   sprintCostPerSecond: 20
-  jumpCost: 15
   regenDelay: 2
   debugLogs: 0
-  CurrentStamina:
+  currentStamina:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0

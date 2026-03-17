@@ -187,7 +187,7 @@ namespace Inventory
                     return true;
                 }
             }
-            Debug.Log("[PlayerInventory] กระเป๋าเต็ม! ไม่สามารถเก็บได้");
+            Debug.Log("[PlayerInventory] Inventory is full.้");
             return false;
         }
 

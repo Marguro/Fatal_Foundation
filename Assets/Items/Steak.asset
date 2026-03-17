@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20b8cc66a2bc47e7b996d89ab959ced4, type: 3}
-  m_Name: Health
+  m_Name: Steak
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.ConsumableItemData
-  itemName: Health
-  itemIcon: {fileID: 21300000, guid: 30fc643c077d3f4e6accb809884a8456, type: 3}
-  worldPrefab: {fileID: 8287169751701251316, guid: c00f0a8662fd9ca2db4f02f164a67b4a, type: 3}
-  handPrefab: {fileID: 2554358217172350297, guid: 58ed2d52b898f46c9afa4724597e8097, type: 3}
+  itemName: Steak
+  itemIcon: {fileID: 21300000, guid: 666b87a48ba869542aeb448c32949241, type: 3}
+  worldPrefab: {fileID: 8695509015078978454, guid: b979ba55c67e8194390e0b7ef7266cba, type: 3}
+  handPrefab: {fileID: 2554358217172350297, guid: b71f28f3e157e0345af4efc6e02fc5dd, type: 3}
   weight: 0
   scrapValue: 0
   isTwoHanded: 0
-  healAmount: 20
-  staminaAmount: 0
+  healAmount: 0
+  staminaAmount: 20
   consumeSound: {fileID: 0}
   consumeVFX: {fileID: 0}
