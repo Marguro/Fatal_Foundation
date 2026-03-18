@@ -27,6 +27,17 @@ namespace Inventory
         [BoxGroup("Weight Settings")]
         [SerializeField] private float minMoveSpeed = 0.5f;
 
+        [BoxGroup("Drop Settings")]
+        [SerializeField] private float dropForwardDistance = 1.25f;
+        [BoxGroup("Drop Settings")]
+        [SerializeField] private float dropRaycastStartHeight = 1.5f;
+        [BoxGroup("Drop Settings")]
+        [SerializeField] private float dropRaycastDistance = 5f;
+        [BoxGroup("Drop Settings")]
+        [SerializeField] private float dropGroundOffset = 0.05f;
+        [BoxGroup("Drop Settings")]
+        [SerializeField] private LayerMask dropGroundMask = ~0;
+
         private const int SlotCount = 4;
         private ItemData[] _slots = new ItemData[SlotCount];
         private int _currentSlotIndex;
@@ -247,7 +258,7 @@ namespace Inventory
              ItemData data = allGameItems.FirstOrDefault(i => i.itemName == itemName);
              if (data != null && data.worldPrefab != null)
              {
-             Vector3 dropPos = transform.position + transform.forward * 1.0f + Vector3.up * 1.5f; // Drop from higher position
+             Vector3 dropPos = GetGroundedDropPosition();
              GameObject spawnedItem = Instantiate(data.worldPrefab, dropPos, Quaternion.identity);
              
              // Check if registered in NetworkManager (Host check)
@@ -301,6 +312,27 @@ namespace Inventory
                  }
              }
              }
+        }
+
+        private Vector3 GetGroundedDropPosition()
+        {
+            Vector3 forward = transform.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.001f)
+            {
+                forward = transform.forward;
+            }
+            forward.Normalize();
+
+            Vector3 probeOrigin = transform.position + forward * dropForwardDistance + Vector3.up * dropRaycastStartHeight;
+
+            if (Physics.Raycast(probeOrigin, Vector3.down, out RaycastHit hit, dropRaycastDistance, dropGroundMask, QueryTriggerInteraction.Ignore))
+            {
+                return hit.point + Vector3.up * dropGroundOffset;
+            }
+
+            // Fallback: keep item near feet so it does not spawn too high if no ground was hit.
+            return transform.position + forward * dropForwardDistance + Vector3.up * dropGroundOffset;
         }
 
         private void UpdateHandItem()

@@ -24,9 +24,9 @@ namespace Inventory
         [SerializeField] private Text promptText;
 
         [BoxGroup("UI Prompt")]
-        [SerializeField] private string promptPrefix = "Press E to collect";
+        [SerializeField] private string defaultPrompt = "Press E to interact";
 
-        private WorldItem _lookingAt;
+        private IInteractable _lookingAt;
 
         private void Start()
         {
@@ -46,10 +46,14 @@ namespace Inventory
         private void CheckForInteractable()
         {
             Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-            WorldItem found = null;
+            IInteractable found = null;
 
-            if (Physics.Raycast(ray, out RaycastHit hit, interactionRange, interactableLayer))
-                found = hit.collider.GetComponent<WorldItem>();
+            if (Physics.Raycast(ray, out RaycastHit hit, interactionRange, interactableLayer, QueryTriggerInteraction.Collide))
+            {
+                found = hit.collider.GetComponent<IInteractable>()
+                        ?? hit.collider.GetComponentInParent<IInteractable>()
+                        ?? hit.collider.GetComponentInChildren<IInteractable>();
+            }
 
             if (found != _lookingAt)
             {
@@ -61,7 +65,7 @@ namespace Inventory
                 if (_lookingAt != null)
                 {
                     _lookingAt.SetHighlight(true);
-                    UpdatePromptText(_lookingAt.itemData);
+                    UpdatePromptText(_lookingAt.PromptText);
                     SetPromptVisible(true);
                 }
                 else
@@ -83,19 +87,14 @@ namespace Inventory
             interactPressed = Input.GetKeyDown(KeyCode.E);
 #endif
             if (interactPressed)
-                _lookingAt.Interact();
+                _lookingAt.Interact(gameObject);
         }
 
 
-        private void UpdatePromptText(ItemData data)
+        private void UpdatePromptText(string prompt)
         {
             if (promptText == null) return;
-
-            if (data != null)
-                promptText.text = $"{promptPrefix}<b>{data.itemName}</b>" +
-                                  (data.weight > 0f ? $"  ({data.weight}kg)" : "");
-            else
-                promptText.text = promptPrefix;
+            promptText.text = string.IsNullOrWhiteSpace(prompt) ? defaultPrompt : prompt;
         }
 
         private void SetPromptVisible(bool visible)

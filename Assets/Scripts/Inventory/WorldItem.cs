@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Inventory
 {
     [RequireComponent(typeof(NetworkObject))]
-    public class WorldItem : NetworkBehaviour
+    public class WorldItem : NetworkBehaviour, IInteractable
     {
         [BoxGroup("Item Data")]
         public ItemData itemData;
@@ -27,6 +27,15 @@ namespace Inventory
 
         private Vector3 _startPosition;
         private float _bobTimer;
+
+        public string PromptText
+        {
+            get
+            {
+                if (itemData == null) return "Press E to interact";
+                return $"Press E to collect {itemData.itemName}";
+            }
+        }
 
         public override void OnNetworkSpawn()
         {
@@ -53,18 +62,36 @@ namespace Inventory
 
         public void Interact()
         {
+            Interact(PlayerInventory.Instance != null ? PlayerInventory.Instance.gameObject : null);
+        }
+
+        public void Interact(GameObject interactor)
+        {
             if (itemData == null) return;
-            
-            // Client-side prediction / Local pickup logic
-            if (PlayerInventory.Instance != null)
+
+            PlayerInventory inventory = interactor != null
+                ? interactor.GetComponent<PlayerInventory>()
+                : PlayerInventory.Instance;
+
+            if (inventory != null)
             {
-               bool pickedUp = PlayerInventory.Instance.PickUpItem(itemData);
+               bool pickedUp = inventory.PickUpItem(itemData);
                if (pickedUp)
                {
-                   // Request server to despawn this object
                    RequestDespawnServerRpc();
                }
             }
+        }
+
+        public void SellAndDespawn()
+        {
+            if (TryGetComponent(out NetworkObject netObj) && netObj.IsSpawned)
+            {
+                RequestDespawnServerRpc();
+                return;
+            }
+
+            Destroy(gameObject);
         }
 
         [ServerRpc(RequireOwnership = false)]

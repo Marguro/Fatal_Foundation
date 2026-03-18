@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 7749060380058493648}
   - component: {fileID: 2155087426466563239}
   - component: {fileID: 2258510986131091859}
+  - component: {fileID: 6286025427715261924}
   m_Layer: 8
   m_Name: PlayerCapsule
   m_TagString: Player
@@ -287,6 +288,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ff20a3aeabbbaf64399ce1c06f8a7e12, type: 2}
   weightMultiplier: 0.5
   minMoveSpeed: 0.5
+  dropForwardDistance: 1.25
+  dropRaycastStartHeight: 1.5
+  dropRaycastDistance: 5
+  dropGroundOffset: 0.05
+  dropGroundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!114 &8478105761366780714
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -306,7 +314,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   interactPromptUI: {fileID: 0}
   promptText: {fileID: 0}
-  promptPrefix: Press E to collect
+  defaultPrompt: Press E to interact
 --- !u!114 &1955954487685726740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -416,6 +424,20 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 100
+--- !u!114 &6286025427715261924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2153596515888635933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7b49c1510ef4b8b8c22bdedee8a5f68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Trading.SilverCurrency
+  ShowTopMostFoldoutHeaderGroup: 1
+  startingSilver: 100
 --- !u!1 &3170168950744598181
 GameObject:
   m_ObjectHideFlags: 0
