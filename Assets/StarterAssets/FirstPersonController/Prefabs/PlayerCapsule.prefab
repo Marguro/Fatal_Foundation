@@ -159,6 +159,7 @@ GameObject:
   - component: {fileID: 1978471637655604388}
   - component: {fileID: 5420857361349278248}
   - component: {fileID: 8616685848737228376}
+  - component: {fileID: -2467581988776136136}
   - component: {fileID: 77056626789684298}
   m_Layer: 8
   m_Name: PlayerCapsule
@@ -238,6 +239,11 @@ MonoBehaviour:
   CinemachineCameraTarget: {fileID: 4135013735270702863}
   TopClamp: 89
   BottomClamp: -89
+  CrouchHeight: 1
+  StandHeight: 2
+  CrouchMoveSpeed: 2
+  CrouchTransitionSpeed: 10
+  CrouchCameraOffset: -0.5
 --- !u!114 &1978471637655604388
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -271,6 +277,7 @@ MonoBehaviour:
   look: {x: 0, y: 0}
   jump: 0
   sprint: 0
+  crouch: 0
   analogMovement: 0
   cursorLocked: 1
   cursorInputForLook: 1
@@ -372,6 +379,31 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &-2467581988776136136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8616685848737228372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1826396163
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &77056626789684298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,6 +416,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ba232889b7348c1a88e0843eb3d9912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FatalFoundation.PlayerInventory
+  ShowTopMostFoldoutHeaderGroup: 1
   handAnchor: {fileID: 0}
+  allGameItems:
+  - {fileID: 11400000, guid: 70e7c700d1fbc63858f826ed4b793e3a, type: 2}
+  - {fileID: 11400000, guid: 4ae0f3a5e546d1ec189e07a9f38de9ab, type: 2}
+  - {fileID: 11400000, guid: ff20a3aeabbbaf64399ce1c06f8a7e12, type: 2}
+  - {fileID: 11400000, guid: 68ecd54ddf9bb97e481cadb6743e56ae, type: 2}
   weightMultiplier: 0.5
   minMoveSpeed: 0.5
+  dropForwardDistance: 1.25
+  dropRaycastStartHeight: 1.5
+  dropRaycastDistance: 5
+  dropGroundOffset: 0.05
+  dropGroundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
