@@ -17,6 +17,10 @@ namespace Inventory
 
         [BoxGroup("Hand Anchor")]
         [SerializeField] private Transform handAnchor;
+        [BoxGroup("Hand Anchor")]
+        [SerializeField] private bool followCameraPitch = true;
+        [BoxGroup("Hand Anchor")]
+        [SerializeField] private Transform lookPitchSource;
 
         [BoxGroup("Items Database")]
         [SerializeField] private List<ItemData> allGameItems = new List<ItemData>();
@@ -46,6 +50,9 @@ namespace Inventory
         private FirstPersonController _fpsController;
         private float _baseMoveSpeed;
         private float _baseSprintSpeed;
+        private Vector3 _handAnchorLocalPosFromLookSource;
+        private Quaternion _handAnchorLocalRotFromLookSource;
+        private bool _hasHandAnchorOffset;
 
         public int CurrentSlotIndex => _currentSlotIndex;
         public ItemData[] Slots => _slots;
@@ -85,11 +92,19 @@ namespace Inventory
             {
                 _baseMoveSpeed   = _fpsController.MoveSpeed;
                 _baseSprintSpeed = _fpsController.SprintSpeed;
+
+                // Use FPS camera target as default pitch source if not assigned manually.
+                if (lookPitchSource == null && _fpsController.CinemachineCameraTarget != null)
+                {
+                    lookPitchSource = _fpsController.CinemachineCameraTarget.transform;
+                }
             }
             else
             {
                 Debug.LogWarning("[PlayerInventory] ไม่พบ FirstPersonController — ระบบน้ำหนักจะไม่ทำงาน");
             }
+
+            CacheHandAnchorOffsetFromLookSource();
         }
 
         public override void OnNetworkDespawn()
@@ -131,6 +146,40 @@ namespace Inventory
             HandleDropInput();
             HandleUseInput();
             ApplyWeightPenalty();
+        }
+
+        private void LateUpdate()
+        {
+            SyncHandAnchorWithLookPitch();
+        }
+
+        private void SyncHandAnchorWithLookPitch()
+        {
+            if (!IsOwner || !followCameraPitch || handAnchor == null || lookPitchSource == null)
+                return;
+
+            if (!_hasHandAnchorOffset)
+                CacheHandAnchorOffsetFromLookSource();
+
+            if (!_hasHandAnchorOffset)
+                return;
+
+            Vector3 worldPos = lookPitchSource.TransformPoint(_handAnchorLocalPosFromLookSource);
+            Quaternion worldRot = lookPitchSource.rotation * _handAnchorLocalRotFromLookSource;
+            handAnchor.SetPositionAndRotation(worldPos, worldRot);
+        }
+
+        private void CacheHandAnchorOffsetFromLookSource()
+        {
+            if (handAnchor == null || lookPitchSource == null)
+            {
+                _hasHandAnchorOffset = false;
+                return;
+            }
+
+            _handAnchorLocalPosFromLookSource = lookPitchSource.InverseTransformPoint(handAnchor.position);
+            _handAnchorLocalRotFromLookSource = Quaternion.Inverse(lookPitchSource.rotation) * handAnchor.rotation;
+            _hasHandAnchorOffset = true;
         }
 
         private void HandleUseInput()
@@ -262,7 +311,6 @@ namespace Inventory
              GameObject spawnedItem = Instantiate(data.worldPrefab, dropPos, Quaternion.identity);
              
              // Check if registered in NetworkManager (Host check)
-             bool isRegistered = false;
              if (NetworkManager.Singleton != null && NetworkManager.Singleton.NetworkConfig != null)
              {
                  var collection = NetworkManager.Singleton.NetworkConfig.Prefabs;
