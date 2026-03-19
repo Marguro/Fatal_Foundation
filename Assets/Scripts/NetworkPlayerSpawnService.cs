@@ -103,7 +103,17 @@ public class NetworkPlayerSpawnService : MonoBehaviour
 
     private void HandleConnectionApproval(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
-        mPreviousApprovalCallback?.Invoke(request, response);
+        if (mPreviousApprovalCallback != null)
+        {
+            mPreviousApprovalCallback.Invoke(request, response);
+        }
+        else
+        {
+            // If no other callback is handling approval, we default to true to allow connections.
+            // This prevents the "Host connection declined" error when no other auth script is present.
+            response.Approved = true;
+            response.CreatePlayerObject = true;
+        }
 
         if (!response.Approved || !response.CreatePlayerObject)
         {
