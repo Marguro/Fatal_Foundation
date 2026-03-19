@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce21b16cc63246cdb4c54b7df69c6b76, type: 3}
+  m_Name: Flashlight
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.FlashlightItemData
+  itemName: Flashlight
+  itemIcon: {fileID: 21300000, guid: 29a7510997a1184e2ae38c66cb3fa23c, type: 3}
+  worldPrefab: {fileID: 8085084807594357021, guid: fc3f4fcf79719c802bc53d203890ed7f, type: 3}
+  handPrefab: {fileID: 8085084807594357021, guid: afd57b52f8e6eb45b9f1dc6fc15a3f02, type: 3}
+  weight: 1
+  scrapValue: 0
+  isTwoHanded: 0

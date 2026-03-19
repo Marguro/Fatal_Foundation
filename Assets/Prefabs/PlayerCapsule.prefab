@@ -281,11 +281,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FatalFoundation.PlayerInventory
   ShowTopMostFoldoutHeaderGroup: 1
   handAnchor: {fileID: 7474705619174202243}
+  followCameraPitch: 1
+  lookPitchSource: {fileID: 0}
   allGameItems:
   - {fileID: 11400000, guid: 70e7c700d1fbc63858f826ed4b793e3a, type: 2}
   - {fileID: 11400000, guid: 4ae0f3a5e546d1ec189e07a9f38de9ab, type: 2}
   - {fileID: 11400000, guid: 68ecd54ddf9bb97e481cadb6743e56ae, type: 2}
   - {fileID: 11400000, guid: ff20a3aeabbbaf64399ce1c06f8a7e12, type: 2}
+  - {fileID: 11400000, guid: 356d30b6ef60726c195d6d1bce58e3db, type: 2}
+  flashlightItemData: {fileID: 11400000, guid: 356d30b6ef60726c195d6d1bce58e3db, type: 2}
   weightMultiplier: 0.5
   minMoveSpeed: 0.5
   dropForwardDistance: 1.25

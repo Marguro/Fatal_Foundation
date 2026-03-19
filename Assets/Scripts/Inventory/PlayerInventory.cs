@@ -24,7 +24,10 @@ namespace Inventory
 
         [BoxGroup("Items Database")]
         [SerializeField] private List<ItemData> allGameItems = new List<ItemData>();
+        [BoxGroup("Items Database")]
+        [SerializeField] private ItemData flashlightItemData;
         private readonly NetworkVariable<FixedString64Bytes> _netCurrentItemName = new NetworkVariable<FixedString64Bytes>();
+        private readonly NetworkVariable<bool> _netFlashlightEnabled = new NetworkVariable<bool>();
 
         [BoxGroup("Weight Settings")]
         [SerializeField] private float weightMultiplier = 0.5f;
@@ -46,6 +49,7 @@ namespace Inventory
         private ItemData[] _slots = new ItemData[SlotCount];
         private int _currentSlotIndex;
         private GameObject _currentHandObject;
+        private Light[] _currentHandLights;
 
         private FirstPersonController _fpsController;
         private float _baseMoveSpeed;
@@ -53,6 +57,7 @@ namespace Inventory
         private Vector3 _handAnchorLocalPosFromLookSource;
         private Quaternion _handAnchorLocalRotFromLookSource;
         private bool _hasHandAnchorOffset;
+        private bool _appliedFlashlightState;
 
         public int CurrentSlotIndex => _currentSlotIndex;
         public ItemData[] Slots => _slots;
@@ -74,11 +79,14 @@ namespace Inventory
         public override void OnNetworkSpawn()
         {
             _netCurrentItemName.OnValueChanged += OnHeldItemChanged;
+            _netFlashlightEnabled.OnValueChanged += OnFlashlightStateChanged;
 
             if (!IsOwner)
             {
                 if (!_netCurrentItemName.Value.IsEmpty)
                     UpdateRemoteHandVisual(_netCurrentItemName.Value.ToString());
+
+                ApplyCurrentHandFlashlightState(_netFlashlightEnabled.Value);
 
                 enabled = false;
                 return;
@@ -110,6 +118,7 @@ namespace Inventory
         public override void OnNetworkDespawn()
         {
             _netCurrentItemName.OnValueChanged -= OnHeldItemChanged;
+            _netFlashlightEnabled.OnValueChanged -= OnFlashlightStateChanged;
             if (IsOwner && Instance == this)
                 Instance = null;
         }
@@ -120,9 +129,15 @@ namespace Inventory
             UpdateRemoteHandVisual(newName.ToString());
         }
 
+        private void OnFlashlightStateChanged(bool oldValue, bool newValue)
+        {
+            ApplyCurrentHandFlashlightState(newValue);
+        }
+
         private void UpdateRemoteHandVisual(string itemName)
         {
             if (_currentHandObject != null) Destroy(_currentHandObject);
+            _currentHandLights = null;
             if (string.IsNullOrEmpty(itemName)) return;
 
             ItemData data = allGameItems.FirstOrDefault(i => i.itemName == itemName);
@@ -131,6 +146,8 @@ namespace Inventory
                 _currentHandObject = Instantiate(data.handPrefab, handAnchor);
                 _currentHandObject.transform.localPosition = Vector3.zero;
                 _currentHandObject.transform.localRotation = Quaternion.identity;
+                _currentHandLights = _currentHandObject.GetComponentsInChildren<Light>(true);
+                ApplyCurrentHandFlashlightState(_netFlashlightEnabled.Value);
             }
         }
         
@@ -144,6 +161,7 @@ namespace Inventory
         {
             HandleScrollInput();
             HandleDropInput();
+            HandleFlashlightToggleInput();
             HandleUseInput();
             ApplyWeightPenalty();
         }
@@ -191,7 +209,29 @@ namespace Inventory
 #else
             usePressed = Input.GetMouseButtonDown(0);
 #endif
-            if (usePressed) UseCurrentItem();
+            if (usePressed)
+            {
+                if (IsHoldingFlashlight()) return;
+                UseCurrentItem();
+            }
+        }
+
+        private void HandleFlashlightToggleInput()
+        {
+            bool togglePressed = false;
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null)
+                togglePressed = Keyboard.current.fKey.wasPressedThisFrame;
+#else
+            togglePressed = Input.GetKeyDown(KeyCode.F);
+#endif
+
+            if (!togglePressed || !IsHoldingFlashlight())
+                return;
+
+            bool nextState = !_appliedFlashlightState;
+            ApplyCurrentHandFlashlightState(nextState);
+            SetFlashlightStateServerRpc(nextState);
         }
 
         private void HandleScrollInput()
@@ -256,6 +296,12 @@ namespace Inventory
             if (_slots[_currentSlotIndex] == null) return;
 
             ItemData droppedItem = _slots[_currentSlotIndex];
+            if (IsItemFlashlight(droppedItem))
+            {
+                ApplyCurrentHandFlashlightState(false);
+                SetFlashlightStateServerRpc(false);
+            }
+
             if (droppedItem.worldPrefab != null)
             {
                 RequestDropItemServerRpc(droppedItem.itemName);
@@ -387,6 +433,7 @@ namespace Inventory
         {
             if (_currentHandObject != null)
                 Destroy(_currentHandObject);
+            _currentHandLights = null;
 
             ItemData currentItem = _slots[_currentSlotIndex];
             string itemName = "";
@@ -399,13 +446,59 @@ namespace Inventory
                     _currentHandObject = Instantiate(currentItem.handPrefab, handAnchor);
                     _currentHandObject.transform.localPosition = Vector3.zero;
                     _currentHandObject.transform.localRotation = Quaternion.identity;
+                    _currentHandLights = _currentHandObject.GetComponentsInChildren<Light>(true);
                 }
+            }
+
+            if (!IsHoldingFlashlight())
+            {
+                ApplyCurrentHandFlashlightState(false);
+                SetFlashlightStateServerRpc(false);
+            }
+            else
+            {
+                ApplyCurrentHandFlashlightState(_netFlashlightEnabled.Value);
             }
             
             if (IsOwner)
             {
                 UpdateHeldItemServerRpc(itemName);
             }
+        }
+
+        private bool IsHoldingFlashlight()
+        {
+            return IsItemFlashlight(_slots[_currentSlotIndex]);
+        }
+
+        private bool IsItemFlashlight(ItemData item)
+        {
+            return item != null && flashlightItemData != null && item == flashlightItemData;
+        }
+
+        private void ApplyCurrentHandFlashlightState(bool isOn)
+        {
+            _appliedFlashlightState = isOn;
+
+            if (_currentHandObject != null)
+            {
+                _currentHandObject.SendMessage("SetOn", isOn, SendMessageOptions.DontRequireReceiver);
+            }
+
+            if (_currentHandLights == null)
+                return;
+
+            foreach (var lightComp in _currentHandLights)
+            {
+                if (lightComp != null)
+                    lightComp.enabled = isOn;
+            }
+        }
+
+        [ServerRpc]
+        private void SetFlashlightStateServerRpc(bool isOn)
+        {
+            _netFlashlightEnabled.Value = isOn;
         }
         
 #if UNITY_EDITOR
