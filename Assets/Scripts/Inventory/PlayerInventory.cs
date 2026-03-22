@@ -183,8 +183,18 @@ namespace Inventory
                 return;
 
             Vector3 worldPos = lookPitchSource.TransformPoint(_handAnchorLocalPosFromLookSource);
-            Quaternion worldRot = lookPitchSource.rotation * _handAnchorLocalRotFromLookSource;
+            Quaternion localRot = GetEquippedHandAnchorLocalRotation();
+            Quaternion worldRot = lookPitchSource.rotation * localRot;
             handAnchor.SetPositionAndRotation(worldPos, worldRot);
+        }
+
+        private Quaternion GetEquippedHandAnchorLocalRotation()
+        {
+            ItemData equippedItem = _slots[_currentSlotIndex];
+            if (equippedItem != null && equippedItem.useHandAnchorRotationOverride)
+                return Quaternion.Euler(equippedItem.handAnchorRotationEuler);
+
+            return _handAnchorLocalRotFromLookSource;
         }
 
         private void CacheHandAnchorOffsetFromLookSource()
@@ -354,7 +364,8 @@ namespace Inventory
              if (data != null && data.worldPrefab != null)
              {
              Vector3 dropPos = GetGroundedDropPosition();
-             GameObject spawnedItem = Instantiate(data.worldPrefab, dropPos, Quaternion.identity);
+             Quaternion dropRotation = GetDropRotationForItem(data);
+             GameObject spawnedItem = Instantiate(data.worldPrefab, dropPos, dropRotation);
              
              // Check if registered in NetworkManager (Host check)
              if (NetworkManager.Singleton != null && NetworkManager.Singleton.NetworkConfig != null)
@@ -406,6 +417,14 @@ namespace Inventory
                  }
              }
              }
+        }
+
+        private Quaternion GetDropRotationForItem(ItemData itemData)
+        {
+            if (itemData != null && itemData.useHandAnchorRotationOverride)
+                return Quaternion.Euler(itemData.handAnchorRotationEuler);
+
+            return Quaternion.identity;
         }
 
         private Vector3 GetGroundedDropPosition()

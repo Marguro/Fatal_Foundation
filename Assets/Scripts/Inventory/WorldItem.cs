@@ -1,4 +1,5 @@
 using NaughtyAttributes;
+using DG.Tweening;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -12,6 +13,12 @@ namespace Inventory
 
         [BoxGroup("Visual Feedback")]
         [SerializeField] private GameObject highlightEffect;
+
+        [BoxGroup("Visual Feedback")]
+        [SerializeField] private float scanPulseScale = 1.2f;
+
+        [BoxGroup("Visual Feedback")]
+        [SerializeField] private float scanPulseDuration = 0.25f;
 
         [BoxGroup("Bob & Rotate Animation")]
         [SerializeField] private bool enableBobAnimation = true;
@@ -27,6 +34,11 @@ namespace Inventory
 
         private Vector3 _startPosition;
         private float _bobTimer;
+        private bool _lookHighlightActive;
+        private bool _scanHighlightActive;
+        private Vector3 _highlightDefaultScale = Vector3.one;
+        private Tween _scanPulseTween;
+        private Tween _scanTimerTween;
 
         public string PromptText
         {
@@ -40,13 +52,17 @@ namespace Inventory
         public override void OnNetworkSpawn()
         {
             if (highlightEffect != null)
+            {
+                _highlightDefaultScale = highlightEffect.transform.localScale;
                 highlightEffect.SetActive(false);
+            }
         }
 
         private void Start()
         {
             _startPosition = transform.position;
-            // Highlight disabled in OnNetworkSpawn or here is fine
+            if (highlightEffect != null)
+                _highlightDefaultScale = highlightEffect.transform.localScale;
         }
 
         private void Update()
@@ -103,8 +119,75 @@ namespace Inventory
         
         public void SetHighlight(bool active)
         {
+            // WorldItem highlight is scan-only; ignore look-at highlight requests.
+            _lookHighlightActive = false;
+            RefreshHighlightState();
+        }
+
+        public void SetScanHighlightForSeconds(float seconds)
+        {
+            if (seconds <= 0f)
+            {
+                _scanHighlightActive = false;
+                StopScanPulse();
+                RefreshHighlightState();
+                return;
+            }
+
+            _scanHighlightActive = true;
+            RefreshHighlightState();
+            StartScanPulse();
+
+            _scanTimerTween?.Kill();
+            _scanTimerTween = DOVirtual.DelayedCall(seconds, () =>
+            {
+                _scanHighlightActive = false;
+                StopScanPulse();
+                RefreshHighlightState();
+            }).SetTarget(this);
+        }
+
+        private void RefreshHighlightState()
+        {
+            if (highlightEffect == null) return;
+
+            bool shouldShow = _lookHighlightActive || _scanHighlightActive;
+            highlightEffect.SetActive(shouldShow);
+        }
+
+        private void StartScanPulse()
+        {
+            if (highlightEffect == null) return;
+
+            StopScanPulse();
+            Transform effectTransform = highlightEffect.transform;
+            effectTransform.localScale = _highlightDefaultScale;
+
+            _scanPulseTween = effectTransform
+                .DOScale(_highlightDefaultScale * scanPulseScale, scanPulseDuration)
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetEase(Ease.InOutSine)
+                .SetTarget(this);
+        }
+
+        private void StopScanPulse()
+        {
+            if (_scanPulseTween != null)
+            {
+                _scanPulseTween.Kill();
+                _scanPulseTween = null;
+            }
+
             if (highlightEffect != null)
-                highlightEffect.SetActive(active);
+                highlightEffect.transform.localScale = _highlightDefaultScale;
+        }
+
+        private void OnDisable()
+        {
+            _scanPulseTween?.Kill();
+            _scanTimerTween?.Kill();
+            _scanPulseTween = null;
+            _scanTimerTween = null;
         }
 
         private void OnDrawGizmosSelected()

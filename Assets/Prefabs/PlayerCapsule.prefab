@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 2155087426466563239}
   - component: {fileID: 2258510986131091859}
   - component: {fileID: 6286025427715261924}
+  - component: {fileID: -2198356894319103603}
   m_Layer: 8
   m_Name: PlayerCapsule
   m_TagString: Player
@@ -254,7 +255,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2305109140
+  GlobalObjectIdHash: 1895227009
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -289,6 +290,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 68ecd54ddf9bb97e481cadb6743e56ae, type: 2}
   - {fileID: 11400000, guid: ff20a3aeabbbaf64399ce1c06f8a7e12, type: 2}
   - {fileID: 11400000, guid: 356d30b6ef60726c195d6d1bce58e3db, type: 2}
+  - {fileID: 11400000, guid: 479d698337bddb14e8b375a84b4ae495, type: 2}
   flashlightItemData: {fileID: 11400000, guid: 356d30b6ef60726c195d6d1bce58e3db, type: 2}
   weightMultiplier: 0.5
   minMoveSpeed: 0.5
@@ -383,6 +385,7 @@ MonoBehaviour:
   playerInput: {fileID: 2382947447953547117}
   playerInventory: {fileID: 6932498809128189027}
   interactionSystem: {fileID: 8478105761366780714}
+  groundItemScanner: {fileID: 0}
   playerFollowCamera: {fileID: 3170168950744598181}
 --- !u!114 &2155087426466563239
 MonoBehaviour:
@@ -442,6 +445,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Trading.SilverCurrency
   ShowTopMostFoldoutHeaderGroup: 1
   startingSilver: 100
+--- !u!114 &-2198356894319103603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2153596515888635933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e15d561c672845b199f2fdcc76ae62c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.GroundItemScanner
+  scanRadius: 8
+  scanCooldown: 1.25
+  highlightDuration: 2
+  itemLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  maxColliders: 64
 --- !u!1 &3170168950744598181
 GameObject:
   m_ObjectHideFlags: 0

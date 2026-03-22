@@ -19,6 +19,7 @@ public class NetworkPlayerSetup : NetworkBehaviour
         [SerializeField] private PlayerInput playerInput;
         [SerializeField] private PlayerInventory playerInventory;
         [SerializeField] private InteractionSystem interactionSystem;
+        [SerializeField] private GroundItemScanner groundItemScanner;
 
         [Header("Camera (disabled on remote players)")]
         [Tooltip("Drag 'PlayerFollowCamera' child GameObject here")]
@@ -38,6 +39,7 @@ public class NetworkPlayerSetup : NetworkBehaviour
             playerInput           = GetComponent<PlayerInput>();
             playerInventory       = GetComponent<PlayerInventory>();
             interactionSystem     = GetComponent<InteractionSystem>();
+            groundItemScanner     = GetComponent<GroundItemScanner>();
 
             // หา PlayerFollowCamera ใน children
             foreach (Transform child in transform)
@@ -68,6 +70,7 @@ public class NetworkPlayerSetup : NetworkBehaviour
             // ปิด Inventory & Interaction (ทำงานเฉพาะเครื่องเจ้าของเท่านั้น)
             if (playerInventory   != null) playerInventory.enabled   = false;
             if (interactionSystem != null) interactionSystem.enabled = false;
+            if (groundItemScanner != null) groundItemScanner.enabled = false;
 
             // ปิด Cinemachine Follow Camera ของ remote player
             // ถ้าเปิดทิ้งไว้ CinemachineBrain บนกล้องหลักจะยึดกล้องของ remote player แทน

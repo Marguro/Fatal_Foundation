@@ -26,6 +26,13 @@ namespace Inventory
         [BoxGroup("Item Properties")]
         public bool isTwoHanded;
 
+        [BoxGroup("Hand Anchor")]
+        [Tooltip("When enabled, this item overrides HandAnchor rotation while equipped.")]
+        public bool useHandAnchorRotationOverride;
+        [BoxGroup("Hand Anchor")]
+        [Tooltip("Rotation (Euler) relative to lookPitchSource while this item is equipped.")]
+        public Vector3 handAnchorRotationEuler;
+
         public virtual bool Use(GameObject character)
         {
             Debug.Log($"Using item: {itemName}");
