@@ -32,6 +32,9 @@ namespace Inventory
         [BoxGroup("Hand Anchor")]
         [Tooltip("Rotation (Euler) relative to lookPitchSource while this item is equipped.")]
         public Vector3 handAnchorRotationEuler;
+        [BoxGroup("Hand Item")]
+        [Tooltip("Local position applied to the instantiated hand item GameObject (not HandAnchor).")]
+        public Vector3 handItemLocalPosition;
 
         public virtual bool Use(GameObject character)
         {

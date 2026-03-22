@@ -10,15 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5be19c9377fa4090a183f3c45b0bfd88, type: 3}
-  m_Name: Medium
+  m_Name: Book_01
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.ItemData
-  itemName: Basket
+  itemName: Book_01
   itemIcon: {fileID: 21300000, guid: 43adfe040c57e285cbea576976da100f, type: 3}
-  worldPrefab: {fileID: 4106258002126495490, guid: 0da58ce31898d0345bea90390da0d6ef, type: 3}
-  handPrefab: {fileID: 4106258002126495490, guid: d2e03280223734043b1c8e3165feeab6, type: 3}
+  worldPrefab: {fileID: 2011342013985917354, guid: 0952d9f4b53db714d86c397ffa895612, type: 3}
+  handPrefab: {fileID: 2011342013985917354, guid: 2648bce9eee2ffc4286b763ce616045c, type: 3}
   weight: 1
   scrapValue: 20
   isTwoHanded: 0
   useHandAnchorRotationOverride: 0
   handAnchorRotationEuler: {x: 0, y: 0, z: 0}
-  handItemLocalPosition: {x: 0, y: -0.3, z: 0}

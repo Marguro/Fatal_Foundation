@@ -255,7 +255,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1895227009
+  GlobalObjectIdHash: 2305109140
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -291,6 +291,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ff20a3aeabbbaf64399ce1c06f8a7e12, type: 2}
   - {fileID: 11400000, guid: 356d30b6ef60726c195d6d1bce58e3db, type: 2}
   - {fileID: 11400000, guid: 479d698337bddb14e8b375a84b4ae495, type: 2}
+  - {fileID: 11400000, guid: aeea7f15c95a250409bbceb3dfe25757, type: 2}
   flashlightItemData: {fileID: 11400000, guid: 356d30b6ef60726c195d6d1bce58e3db, type: 2}
   weightMultiplier: 0.5
   minMoveSpeed: 0.5

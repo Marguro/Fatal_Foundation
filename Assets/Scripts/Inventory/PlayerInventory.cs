@@ -144,7 +144,7 @@ namespace Inventory
             if (data != null && data.handPrefab != null)
             {
                 _currentHandObject = Instantiate(data.handPrefab, handAnchor);
-                _currentHandObject.transform.localPosition = Vector3.zero;
+                _currentHandObject.transform.localPosition = data.handItemLocalPosition;
                 _currentHandObject.transform.localRotation = Quaternion.identity;
                 _currentHandLights = _currentHandObject.GetComponentsInChildren<Light>(true);
                 ApplyCurrentHandFlashlightState(_netFlashlightEnabled.Value);
@@ -463,7 +463,7 @@ namespace Inventory
                 if (currentItem.handPrefab != null && handAnchor != null)
                 {
                     _currentHandObject = Instantiate(currentItem.handPrefab, handAnchor);
-                    _currentHandObject.transform.localPosition = Vector3.zero;
+                    _currentHandObject.transform.localPosition = currentItem.handItemLocalPosition;
                     _currentHandObject.transform.localRotation = Quaternion.identity;
                     _currentHandLights = _currentHandObject.GetComponentsInChildren<Light>(true);
                 }
