@@ -101,23 +101,32 @@ namespace Trading
                 return false;
             }
 
-            if (!currency.RemoveSilver(buyPrice))
-            {
-                return false;
-            }
-
             PlayerInventory inventory = interactor.GetComponent<PlayerInventory>();
-            bool pickedUp = inventory != null && inventory.PickUpItem(item);
-            if (!pickedUp)
+            if (inventory == null)
             {
-                // Refund if inventory is full.
-                currency.AddSilver(buyPrice);
-                Debug.LogWarning("[TradeStation] Inventory is full. Purchase cancelled and refunded.");
+                Debug.LogWarning("[TradeStation] No PlayerInventory found on interactor.");
                 return false;
             }
 
-            ConsumeStock(item);
-            Debug.Log($"[TradeStation] Bought '{item.itemName}' for {buyPrice} Silver.");
+            // Shared silver spend is server-authoritative; item is granted only to the buyer client.
+            currency.TrySpendSilver(buyPrice, success =>
+            {
+                if (!success)
+                    return;
+
+                bool pickedUp = inventory.PickUpItem(item);
+                if (!pickedUp)
+                {
+                    // Refund if inventory is full after server accepted payment.
+                    currency.AddSilver(buyPrice);
+                    Debug.LogWarning("[TradeStation] Inventory is full. Purchase cancelled and refunded.");
+                    return;
+                }
+
+                ConsumeStock(item);
+                Debug.Log($"[TradeStation] Bought '{item.itemName}' for {buyPrice} Silver.");
+            });
+
             return true;
         }
 
