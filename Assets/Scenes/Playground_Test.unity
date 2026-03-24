@@ -2463,7 +2463,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestSpawner
   ShowTopMostFoldoutHeaderGroup: 1
-  prefabToSpawn: {fileID: 4573631869376184610, guid: 3aaf89b5645c16b42a4fa093c78bddf4, type: 3}
+  prefabToSpawn: {fileID: 6265542586836935902, guid: b3cd6101ae52cae49926be0318f85f3b, type: 3}
   autoCollectSpawnPoints: 1
   randomSpawnPoint: 0
   spawnPoints:
@@ -3699,7 +3699,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2086436139
 Transform:
   m_ObjectHideFlags: 0
