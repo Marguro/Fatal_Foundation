@@ -22,21 +22,22 @@ namespace Perks
                 OnPerkMenuRequested();
             }
 
-            // Method 2: Touch input (Tap detection)
-            if (Input.touchCount > 0)
+            // Method 2: Touch input (Tap detection) via the new Input System
+            var touchscreen = Touchscreen.current;
+            if (touchscreen != null)
             {
-                Touch touch = Input.GetTouch(0);
+                var primaryTouch = touchscreen.primaryTouch;
 
-                if (touch.phase == UnityEngine.TouchPhase.Began)
+                if (primaryTouch.press.wasPressedThisFrame)
                 {
                     _lastTapTime = Time.time;
                     _isTapping = true;
                 }
 
-                if (touch.phase == UnityEngine.TouchPhase.Ended && _isTapping)
+                if (primaryTouch.press.wasReleasedThisFrame && _isTapping)
                 {
-                    float tapDuration = Time.time - _lastTapTime;
-                    if (tapDuration < this.tapDuration)
+                    float tapTime = Time.time - _lastTapTime;
+                    if (tapTime < this.tapDuration)
                     {
                         // Short tap detected
                         OnPerkMenuRequested();
