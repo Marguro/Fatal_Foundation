@@ -56,6 +56,7 @@ namespace Inventory
         private float _baseSprintSpeed;
         private Vector3 _handAnchorLocalPosFromLookSource;
         private Quaternion _handAnchorLocalRotFromLookSource;
+        private Quaternion _defaultHandAnchorLocalRotation;
         private bool _hasHandAnchorOffset;
         private bool _appliedFlashlightState;
 
@@ -80,6 +81,9 @@ namespace Inventory
         {
             _netCurrentItemName.OnValueChanged += OnHeldItemChanged;
             _netFlashlightEnabled.OnValueChanged += OnFlashlightStateChanged;
+
+            if (handAnchor != null)
+                _defaultHandAnchorLocalRotation = handAnchor.localRotation;
 
             if (!IsOwner)
             {
@@ -136,27 +140,35 @@ namespace Inventory
         {
             if (_currentHandObject != null) Destroy(_currentHandObject);
             _currentHandLights = null;
-            if (string.IsNullOrEmpty(itemName)) return;
+            if (string.IsNullOrEmpty(itemName))
+            {
+                ApplyRemoteHandAnchorRotation(null);
+                return;
+            }
 
             ItemData data = allGameItems.FirstOrDefault(i => i.itemName == itemName);
+            ApplyRemoteHandAnchorRotation(data);
             if (data != null && data.handPrefab != null)
             {
                 _currentHandObject = Instantiate(data.handPrefab, handAnchor);
                 _currentHandObject.transform.localPosition = data.handItemLocalPosition;
-                _currentHandObject.transform.localRotation = GetRemoteHandItemLocalRotation(data);
+                _currentHandObject.transform.localRotation = Quaternion.identity;
                 _currentHandLights = _currentHandObject.GetComponentsInChildren<Light>(true);
                 ApplyCurrentHandFlashlightState(_netFlashlightEnabled.Value);
             }
         }
 
-        private Quaternion GetRemoteHandItemLocalRotation(ItemData itemData)
+        private void ApplyRemoteHandAnchorRotation(ItemData itemData)
         {
-            if (itemData != null && itemData.useHandAnchorRotationOverride)
-                return Quaternion.Euler(itemData.handAnchorRotationEuler);
+            if (IsOwner || handAnchor == null)
+                return;
 
-            return Quaternion.identity;
+            handAnchor.localRotation = _defaultHandAnchorLocalRotation;
+
+            if (itemData != null && itemData.useHandAnchorRotationOverride)
+                handAnchor.localRotation = Quaternion.Euler(itemData.handAnchorRotationEuler);
         }
-        
+
         [ServerRpc]
         private void UpdateHeldItemServerRpc(string newItemName)
         {
