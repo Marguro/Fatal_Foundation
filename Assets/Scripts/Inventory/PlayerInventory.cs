@@ -87,8 +87,6 @@ namespace Inventory
                     UpdateRemoteHandVisual(_netCurrentItemName.Value.ToString());
 
                 ApplyCurrentHandFlashlightState(_netFlashlightEnabled.Value);
-
-                enabled = false;
                 return;
             }
 
@@ -145,10 +143,18 @@ namespace Inventory
             {
                 _currentHandObject = Instantiate(data.handPrefab, handAnchor);
                 _currentHandObject.transform.localPosition = data.handItemLocalPosition;
-                _currentHandObject.transform.localRotation = Quaternion.identity;
+                _currentHandObject.transform.localRotation = GetRemoteHandItemLocalRotation(data);
                 _currentHandLights = _currentHandObject.GetComponentsInChildren<Light>(true);
                 ApplyCurrentHandFlashlightState(_netFlashlightEnabled.Value);
             }
+        }
+
+        private Quaternion GetRemoteHandItemLocalRotation(ItemData itemData)
+        {
+            if (itemData != null && itemData.useHandAnchorRotationOverride)
+                return Quaternion.Euler(itemData.handAnchorRotationEuler);
+
+            return Quaternion.identity;
         }
         
         [ServerRpc]
@@ -159,6 +165,9 @@ namespace Inventory
 
         private void Update()
         {
+            if (!IsOwner)
+                return;
+
             HandleScrollInput();
             HandleDropInput();
             HandleFlashlightToggleInput();

@@ -17,7 +17,6 @@ public class NetworkPlayerSetup : NetworkBehaviour
         [SerializeField] private FirstPersonController firstPersonController;
         [SerializeField] private StarterAssetsInputs starterAssetsInputs;
         [SerializeField] private PlayerInput playerInput;
-        [SerializeField] private PlayerInventory playerInventory;
         [SerializeField] private InteractionSystem interactionSystem;
         [SerializeField] private GroundItemScanner groundItemScanner;
 
@@ -37,7 +36,6 @@ public class NetworkPlayerSetup : NetworkBehaviour
             firstPersonController = GetComponent<FirstPersonController>();
             starterAssetsInputs   = GetComponent<StarterAssetsInputs>();
             playerInput           = GetComponent<PlayerInput>();
-            playerInventory       = GetComponent<PlayerInventory>();
             interactionSystem     = GetComponent<InteractionSystem>();
             groundItemScanner     = GetComponent<GroundItemScanner>();
 
@@ -67,8 +65,7 @@ public class NetworkPlayerSetup : NetworkBehaviour
             if (starterAssetsInputs   != null) starterAssetsInputs.enabled   = false;
             if (playerInput           != null) playerInput.enabled            = false;
 
-            // ปิด Inventory & Interaction (ทำงานเฉพาะเครื่องเจ้าของเท่านั้น)
-            if (playerInventory   != null) playerInventory.enabled   = false;
+            // Keep PlayerInventory enabled for remote visual sync (held item + flashlight state).
             if (interactionSystem != null) interactionSystem.enabled = false;
             if (groundItemScanner != null) groundItemScanner.enabled = false;
 
