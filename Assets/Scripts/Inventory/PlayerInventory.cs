@@ -28,6 +28,10 @@ namespace Inventory
         [SerializeField] private ItemData flashlightItemData;
         private readonly NetworkVariable<FixedString64Bytes> _netCurrentItemName = new NetworkVariable<FixedString64Bytes>();
         private readonly NetworkVariable<bool> _netFlashlightEnabled = new NetworkVariable<bool>();
+        private readonly NetworkVariable<float> _netLookPitch = new NetworkVariable<float>(
+            0f,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Owner);
 
         [BoxGroup("Weight Settings")]
         [SerializeField] private float weightMultiplier = 0.5f;
@@ -56,7 +60,6 @@ namespace Inventory
         private float _baseSprintSpeed;
         private Vector3 _handAnchorLocalPosFromLookSource;
         private Quaternion _handAnchorLocalRotFromLookSource;
-        private Quaternion _defaultHandAnchorLocalRotation;
         private bool _hasHandAnchorOffset;
         private bool _appliedFlashlightState;
 
@@ -81,33 +84,35 @@ namespace Inventory
         {
             _netCurrentItemName.OnValueChanged += OnHeldItemChanged;
             _netFlashlightEnabled.OnValueChanged += OnFlashlightStateChanged;
+            _netLookPitch.OnValueChanged += OnLookPitchChanged;
 
-            if (handAnchor != null)
-                _defaultHandAnchorLocalRotation = handAnchor.localRotation;
+            _fpsController = GetComponent<FirstPersonController>();
+            if (_fpsController != null)
+            {
+                // Use FPS camera target as default pitch source if not assigned manually.
+                if (lookPitchSource == null && _fpsController.CinemachineCameraTarget != null)
+                    lookPitchSource = _fpsController.CinemachineCameraTarget.transform;
+            }
 
             if (!IsOwner)
             {
+                ApplyRemoteLookPitch(_netLookPitch.Value);
+
                 if (!_netCurrentItemName.Value.IsEmpty)
                     UpdateRemoteHandVisual(_netCurrentItemName.Value.ToString());
 
                 ApplyCurrentHandFlashlightState(_netFlashlightEnabled.Value);
+                CacheHandAnchorOffsetFromLookSource();
                 return;
             }
 
             Instance = this;
             OnLocalInstanceReady?.Invoke(this);
 
-            _fpsController = GetComponent<FirstPersonController>();
             if (_fpsController != null)
             {
                 _baseMoveSpeed   = _fpsController.MoveSpeed;
                 _baseSprintSpeed = _fpsController.SprintSpeed;
-
-                // Use FPS camera target as default pitch source if not assigned manually.
-                if (lookPitchSource == null && _fpsController.CinemachineCameraTarget != null)
-                {
-                    lookPitchSource = _fpsController.CinemachineCameraTarget.transform;
-                }
             }
             else
             {
@@ -121,6 +126,7 @@ namespace Inventory
         {
             _netCurrentItemName.OnValueChanged -= OnHeldItemChanged;
             _netFlashlightEnabled.OnValueChanged -= OnFlashlightStateChanged;
+            _netLookPitch.OnValueChanged -= OnLookPitchChanged;
             if (IsOwner && Instance == this)
                 Instance = null;
         }
@@ -136,18 +142,19 @@ namespace Inventory
             ApplyCurrentHandFlashlightState(newValue);
         }
 
+        private void OnLookPitchChanged(float oldValue, float newValue)
+        {
+            if (IsOwner) return;
+            ApplyRemoteLookPitch(newValue);
+        }
+
         private void UpdateRemoteHandVisual(string itemName)
         {
             if (_currentHandObject != null) Destroy(_currentHandObject);
             _currentHandLights = null;
-            if (string.IsNullOrEmpty(itemName))
-            {
-                ApplyRemoteHandAnchorRotation(null);
-                return;
-            }
+            if (string.IsNullOrEmpty(itemName)) return;
 
-            ItemData data = allGameItems.FirstOrDefault(i => i.itemName == itemName);
-            ApplyRemoteHandAnchorRotation(data);
+            ItemData data = FindItemByName(itemName);
             if (data != null && data.handPrefab != null)
             {
                 _currentHandObject = Instantiate(data.handPrefab, handAnchor);
@@ -156,17 +163,6 @@ namespace Inventory
                 _currentHandLights = _currentHandObject.GetComponentsInChildren<Light>(true);
                 ApplyCurrentHandFlashlightState(_netFlashlightEnabled.Value);
             }
-        }
-
-        private void ApplyRemoteHandAnchorRotation(ItemData itemData)
-        {
-            if (IsOwner || handAnchor == null)
-                return;
-
-            handAnchor.localRotation = _defaultHandAnchorLocalRotation;
-
-            if (itemData != null && itemData.useHandAnchorRotationOverride)
-                handAnchor.localRotation = Quaternion.Euler(itemData.handAnchorRotationEuler);
         }
 
         [ServerRpc]
@@ -189,12 +185,15 @@ namespace Inventory
 
         private void LateUpdate()
         {
+            if (IsOwner)
+                PublishLookPitch();
+
             SyncHandAnchorWithLookPitch();
         }
 
         private void SyncHandAnchorWithLookPitch()
         {
-            if (!IsOwner || !followCameraPitch || handAnchor == null || lookPitchSource == null)
+            if (!followCameraPitch || handAnchor == null || lookPitchSource == null)
                 return;
 
             if (!_hasHandAnchorOffset)
@@ -211,11 +210,48 @@ namespace Inventory
 
         private Quaternion GetEquippedHandAnchorLocalRotation()
         {
-            ItemData equippedItem = _slots[_currentSlotIndex];
+            ItemData equippedItem = IsOwner
+                ? _slots[_currentSlotIndex]
+                : FindItemByName(_netCurrentItemName.Value.ToString());
+
             if (equippedItem != null && equippedItem.useHandAnchorRotationOverride)
                 return Quaternion.Euler(equippedItem.handAnchorRotationEuler);
 
             return _handAnchorLocalRotFromLookSource;
+        }
+
+        private ItemData FindItemByName(string itemName)
+        {
+            if (string.IsNullOrEmpty(itemName))
+                return null;
+
+            return allGameItems.FirstOrDefault(i => i.itemName == itemName);
+        }
+
+        private void PublishLookPitch()
+        {
+            if (!followCameraPitch || lookPitchSource == null)
+                return;
+
+            float currentPitch = NormalizeSignedAngle(lookPitchSource.localEulerAngles.x);
+            if (Mathf.Abs(Mathf.DeltaAngle(_netLookPitch.Value, currentPitch)) > 0.1f)
+                _netLookPitch.Value = currentPitch;
+        }
+
+        private void ApplyRemoteLookPitch(float pitch)
+        {
+            if (IsOwner || lookPitchSource == null)
+                return;
+
+            lookPitchSource.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        }
+
+        private static float NormalizeSignedAngle(float angle)
+        {
+            if (angle > 180f)
+                angle -= 360f;
+
+            return angle;
         }
 
         private void CacheHandAnchorOffsetFromLookSource()
