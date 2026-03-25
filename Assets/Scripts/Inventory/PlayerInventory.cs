@@ -306,15 +306,11 @@ namespace Inventory
             if (_slots[_currentSlotIndex] == null) return;
 
             ItemData droppedItem = _slots[_currentSlotIndex];
-            if (IsItemFlashlight(droppedItem))
-            {
-                ApplyCurrentHandFlashlightState(false);
-                SetFlashlightStateServerRpc(false);
-            }
+            bool droppedFlashlightState = IsItemFlashlight(droppedItem) && _netFlashlightEnabled.Value;
 
             if (droppedItem.worldPrefab != null)
             {
-                RequestDropItemServerRpc(droppedItem.itemName);
+                RequestDropItemServerRpc(droppedItem.itemName, droppedFlashlightState);
             }
 
             _slots[_currentSlotIndex] = null;
@@ -358,7 +354,7 @@ namespace Inventory
         }
 
         [ServerRpc]
-        private void RequestDropItemServerRpc(string itemName)
+        private void RequestDropItemServerRpc(string itemName, bool droppedFlashlightState)
         {
              ItemData data = allGameItems.FirstOrDefault(i => i.itemName == itemName);
              if (data != null && data.worldPrefab != null)
@@ -408,6 +404,7 @@ namespace Inventory
                  try
                  {
                      netObj.Spawn();
+                     ApplyDroppedFlashlightStateClientRpc(netObj, droppedFlashlightState);
                      Debug.Log($"[PlayerInventory] Successfully spawned '{itemName}' at {dropPos}");
                  }
                  catch (System.Exception e)
@@ -417,6 +414,15 @@ namespace Inventory
                  }
              }
              }
+        }
+
+        [ClientRpc]
+        private void ApplyDroppedFlashlightStateClientRpc(NetworkObjectReference droppedItemRef, bool isOn)
+        {
+            if (!droppedItemRef.TryGet(out NetworkObject droppedItemObject) || droppedItemObject == null)
+                return;
+
+            droppedItemObject.gameObject.SendMessage("SetOn", isOn, SendMessageOptions.DontRequireReceiver);
         }
 
         private Quaternion GetDropRotationForItem(ItemData itemData)
@@ -471,8 +477,7 @@ namespace Inventory
 
             if (!IsHoldingFlashlight())
             {
-                ApplyCurrentHandFlashlightState(false);
-                SetFlashlightStateServerRpc(false);
+                _appliedFlashlightState = _netFlashlightEnabled.Value;
             }
             else
             {
