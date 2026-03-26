@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
+using System.Collections.Generic;
 
 namespace Enemies
 {
@@ -246,13 +247,13 @@ namespace Enemies
 
         private Transform FindVisiblePlayer()
         {
-            GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
             float bestDistance = float.MaxValue;
             Transform bestTarget = null;
 
-            for (int i = 0; i < players.Length; i++)
+            List<Transform> candidates = GetPlayerCandidates();
+            for (int i = 0; i < candidates.Count; i++)
             {
-                Transform player = players[i].transform;
+                Transform player = candidates[i];
                 if (!IsTargetValid(player)) continue;
 
                 float distance = Vector3.Distance(transform.position, player.position);
@@ -267,12 +268,46 @@ namespace Enemies
             return bestTarget;
         }
 
+        private List<Transform> GetPlayerCandidates()
+        {
+            var candidates = new List<Transform>();
+            NetworkManager networkManager = NetworkManager.Singleton;
+
+            if (networkManager != null && networkManager.IsServer)
+            {
+                var clients = networkManager.ConnectedClientsList;
+                for (int i = 0; i < clients.Count; i++)
+                {
+                    NetworkObject playerObject = clients[i].PlayerObject;
+                    if (playerObject == null) continue;
+                    candidates.Add(playerObject.transform);
+                }
+            }
+
+            // Fallback keeps local test scenes working even without NGO player objects.
+            if (candidates.Count == 0)
+            {
+                GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+                for (int i = 0; i < players.Length; i++)
+                {
+                    if (players[i] != null)
+                    {
+                        candidates.Add(players[i].transform);
+                    }
+                }
+            }
+
+            return candidates;
+        }
+
         private bool IsTargetValid(Transform candidate)
         {
             if (candidate == null) return false;
 
-            if (!TryGetHealthSystem(candidate, out HealthSystem health)) return false;
-            return health != null && health.currentHealth.Value > 0f;
+            // Some player prefabs may not carry HealthSystem on the same transform hierarchy.
+            // In that case we still allow chasing; damage will only apply when health is present.
+            if (!TryGetHealthSystem(candidate, out HealthSystem health)) return true;
+            return health.currentHealth.Value > 0f;
         }
 
         private bool TryGetHealthSystem(Transform candidate, out HealthSystem health)
@@ -302,9 +337,26 @@ namespace Enemies
             Vector3 direction = (targetPoint - origin).normalized;
             float distance = Vector3.Distance(origin, targetPoint);
 
-            if (Physics.Raycast(origin, direction, out RaycastHit hit, distance))
+            RaycastHit[] hits = Physics.RaycastAll(origin, direction, distance);
+            if (hits == null || hits.Length == 0)
             {
-                return hit.transform == target || hit.transform.IsChildOf(target);
+                return false;
+            }
+
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            for (int i = 0; i < hits.Length; i++)
+            {
+                Transform hitTransform = hits[i].transform;
+                if (hitTransform == null) continue;
+                if (hits[i].collider != null && hits[i].collider.isTrigger) continue;
+
+                // Ignore own collider hierarchy.
+                if (hitTransform == transform || hitTransform.IsChildOf(transform))
+                {
+                    continue;
+                }
+
+                return hitTransform == target || hitTransform.IsChildOf(target);
             }
 
             return false;

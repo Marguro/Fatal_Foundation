@@ -1,6 +1,7 @@
 ﻿using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections.Generic;
 
 namespace Enemies
 {
@@ -127,21 +128,52 @@ namespace Enemies
 
         private void FindNearestPlayer()
         {
-            var players = GameObject.FindGameObjectsWithTag("Player");
+            List<Transform> players = GetPlayerCandidates();
             float minDst = float.MaxValue;
             Transform bestTarget = null;
             
             foreach (var p in players)
             {
-                if (p == null) continue; 
-                float dst = Vector3.Distance(transform.position, p.transform.position);
+                if (p == null) continue;
+                float dst = Vector3.Distance(transform.position, p.position);
                 if (dst < minDst)
                 {
                     minDst = dst;
-                    bestTarget = p.transform;
+                    bestTarget = p;
                 }
             }
             _targetPlayer = bestTarget;
+        }
+
+        private List<Transform> GetPlayerCandidates()
+        {
+            var candidates = new List<Transform>();
+            NetworkManager networkManager = NetworkManager.Singleton;
+
+            if (networkManager != null && networkManager.IsServer)
+            {
+                var clients = networkManager.ConnectedClientsList;
+                for (int i = 0; i < clients.Count; i++)
+                {
+                    NetworkObject playerObject = clients[i].PlayerObject;
+                    if (playerObject == null) continue;
+                    candidates.Add(playerObject.transform);
+                }
+            }
+
+            if (candidates.Count == 0)
+            {
+                GameObject[] scenePlayers = GameObject.FindGameObjectsWithTag("Player");
+                for (int i = 0; i < scenePlayers.Length; i++)
+                {
+                    if (scenePlayers[i] != null)
+                    {
+                        candidates.Add(scenePlayers[i].transform);
+                    }
+                }
+            }
+
+            return candidates;
         }
 
         private bool IsSeenByPlayer()
