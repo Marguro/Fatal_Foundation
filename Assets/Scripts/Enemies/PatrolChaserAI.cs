@@ -1,6 +1,7 @@
 ﻿using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
 
 namespace Enemies
 {
@@ -16,14 +17,18 @@ namespace Enemies
         [Header("Detection")]
         [SerializeField] private float visionRange = 14f;
         [SerializeField, Range(0f, 180f)] private float visionAngle = 65f;
-        [SerializeField] private float loseTargetDistance = 22f;
         [SerializeField] private float scanInterval = 0.2f;
+
+        [Header("Chase")]
+        [FormerlySerializedAs("loseTargetDistance")]
+        [SerializeField] private float chaseDuration = 6f;
 
         [Header("Attack")]
         [SerializeField] private float attackRange = 1.8f;
+        [SerializeField] private float attackDamage = 15f;
 
         [Header("Patrol")]
-        [Tooltip("Optional fixed patrol points. If empty, enemy will roam around spawn point.")]
+        [Tooltip("Optional patrol center points. If empty, enemy will roam around spawn point.")]
         [SerializeField] private Transform[] patrolPoints;
         [SerializeField] private float randomPatrolRadius = 8f;
 
@@ -33,12 +38,14 @@ namespace Enemies
         private int currentPatrolIndex;
         private float nextPatrolMoveTime;
         private float nextScanTime;
+        private float chaseEndTime;
         private bool isWaitingAtPatrolPoint;
 
         private enum State
         {
             Patrolling,
-            Chasing
+            Chasing,
+            ReturningToPatrol
         }
 
         private State currentState = State.Patrolling;
@@ -70,12 +77,10 @@ namespace Enemies
                 nextScanTime = Time.time + scanInterval;
                 if (targetPlayer == null)
                 {
-                    targetPlayer = FindVisiblePlayer();
-                    if (targetPlayer != null)
+                    Transform visibleTarget = FindVisiblePlayer();
+                    if (visibleTarget != null)
                     {
-                        currentState = State.Chasing;
-                        enemyBase.MoveSpeed = chaseSpeed;
-                        isWaitingAtPatrolPoint = false;
+                        StartChase(visibleTarget);
                     }
                 }
             }
@@ -88,6 +93,9 @@ namespace Enemies
                 case State.Chasing:
                     UpdateChase();
                     break;
+                case State.ReturningToPatrol:
+                    UpdateReturnToPatrol();
+                    break;
             }
         }
 
@@ -95,53 +103,14 @@ namespace Enemies
         {
             if (targetPlayer != null)
             {
-                currentState = State.Chasing;
-                enemyBase.MoveSpeed = chaseSpeed;
+                StartChase(targetPlayer);
                 return;
             }
 
-            if (patrolPoints != null && patrolPoints.Length > 0)
-            {
-                PatrolFixedPoints();
-                return;
-            }
-
-            PatrolRandomAroundSpawn();
+            PatrolRandomAroundCenter();
         }
 
-        private void PatrolFixedPoints()
-        {
-            Transform patrolTarget = patrolPoints[currentPatrolIndex];
-            if (patrolTarget == null)
-            {
-                AdvancePatrolIndex();
-                return;
-            }
-
-            enemyBase.MoveTo(patrolTarget.position);
-
-            if (Vector3.Distance(transform.position, patrolTarget.position) <= patrolPointReachedDistance)
-            {
-                enemyBase.StopMoving();
-                if (!isWaitingAtPatrolPoint)
-                {
-                    nextPatrolMoveTime = Time.time + patrolWaitTime;
-                    isWaitingAtPatrolPoint = true;
-                }
-
-                if (Time.time >= nextPatrolMoveTime)
-                {
-                    isWaitingAtPatrolPoint = false;
-                    AdvancePatrolIndex();
-                }
-            }
-            else
-            {
-                isWaitingAtPatrolPoint = false;
-            }
-        }
-
-        private void PatrolRandomAroundSpawn()
+        private void PatrolRandomAroundCenter()
         {
             if (enemyBase.Agent == null || !enemyBase.Agent.enabled || !enemyBase.Agent.isOnNavMesh) return;
 
@@ -163,11 +132,12 @@ namespace Enemies
 
                 Vector3 randomOffset = Random.insideUnitSphere * randomPatrolRadius;
                 randomOffset.y = 0f;
-                Vector3 candidate = spawnPoint + randomOffset;
+                Vector3 candidate = GetCurrentPatrolCenter() + randomOffset;
 
                 if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 4f, NavMesh.AllAreas))
                 {
                     enemyBase.MoveTo(hit.position);
+                    AdvancePatrolIndex();
                 }
 
                 nextPatrolMoveTime = Time.time + patrolWaitTime;
@@ -182,32 +152,91 @@ namespace Enemies
         {
             if (targetPlayer == null)
             {
-                StartPatrolMode();
+                StartReturnToPatrol();
+                return;
+            }
+
+            if (Time.time >= chaseEndTime)
+            {
+                targetPlayer = null;
+                StartReturnToPatrol();
                 return;
             }
 
             float distanceToTarget = Vector3.Distance(transform.position, targetPlayer.position);
-            if (distanceToTarget > loseTargetDistance)
-            {
-                targetPlayer = null;
-                StartPatrolMode();
-                return;
-            }
 
             enemyBase.MoveTo(targetPlayer.position);
 
             if (distanceToTarget <= attackRange && HasLineOfSight(targetPlayer))
             {
-                HealthSystem targetHealth = targetPlayer.GetComponent<HealthSystem>();
-                if (targetHealth != null)
+                if (TryGetHealthSystem(targetPlayer, out HealthSystem targetHealth))
                 {
-                    enemyBase.AttackTarget(targetHealth);
+                    enemyBase.AttackTarget(targetHealth, attackDamage);
                 }
             }
         }
 
+        private void StartChase(Transform playerTarget)
+        {
+            targetPlayer = playerTarget;
+            currentState = State.Chasing;
+            enemyBase.MoveSpeed = chaseSpeed;
+            isWaitingAtPatrolPoint = false;
+            chaseEndTime = Time.time + chaseDuration;
+        }
+
+        private void StartReturnToPatrol()
+        {
+            currentState = State.ReturningToPatrol;
+            enemyBase.MoveSpeed = chaseSpeed;
+            isWaitingAtPatrolPoint = false;
+        }
+
+        private void UpdateReturnToPatrol()
+        {
+            Vector3 returnPosition = GetPatrolReturnPosition();
+            enemyBase.MoveTo(returnPosition);
+
+            if (Vector3.Distance(transform.position, returnPosition) <= patrolPointReachedDistance)
+            {
+                StartPatrolMode();
+            }
+        }
+
+        private Vector3 GetPatrolReturnPosition()
+        {
+            return GetCurrentPatrolCenter();
+        }
+
+        private Vector3 GetCurrentPatrolCenter()
+        {
+            if (patrolPoints == null || patrolPoints.Length == 0)
+            {
+                return spawnPoint;
+            }
+
+            int checkedCount = 0;
+            int index = currentPatrolIndex;
+
+            while (checkedCount < patrolPoints.Length)
+            {
+                Transform patrolCenter = patrolPoints[index];
+                if (patrolCenter != null)
+                {
+                    currentPatrolIndex = index;
+                    return patrolCenter.position;
+                }
+
+                index = (index + 1) % patrolPoints.Length;
+                checkedCount++;
+            }
+
+            return spawnPoint;
+        }
+
         private void StartPatrolMode()
         {
+            targetPlayer = null;
             currentState = State.Patrolling;
             enemyBase.MoveSpeed = patrolSpeed;
             enemyBase.StopMoving();
@@ -242,8 +271,21 @@ namespace Enemies
         {
             if (candidate == null) return false;
 
-            HealthSystem health = candidate.GetComponent<HealthSystem>();
+            if (!TryGetHealthSystem(candidate, out HealthSystem health)) return false;
             return health != null && health.currentHealth.Value > 0f;
+        }
+
+        private bool TryGetHealthSystem(Transform candidate, out HealthSystem health)
+        {
+            health = null;
+            if (candidate == null) return false;
+
+            // Support player setups where tag/collider object is a child while HealthSystem sits on root.
+            health = candidate.GetComponent<HealthSystem>();
+            if (health == null) health = candidate.GetComponentInParent<HealthSystem>();
+            if (health == null) health = candidate.GetComponentInChildren<HealthSystem>();
+
+            return health != null;
         }
 
         private bool IsWithinVisionCone(Vector3 worldPosition)
@@ -270,6 +312,11 @@ namespace Enemies
 
         private void AdvancePatrolIndex()
         {
+            if (patrolPoints == null || patrolPoints.Length == 0)
+            {
+                return;
+            }
+
             currentPatrolIndex++;
             if (currentPatrolIndex >= patrolPoints.Length)
             {

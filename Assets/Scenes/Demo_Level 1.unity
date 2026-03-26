@@ -26167,7 +26167,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &418220039
 Transform:
   m_ObjectHideFlags: 0
@@ -29815,7 +29815,7 @@ GameObject:
   - component: {fileID: 465526319}
   - component: {fileID: 465526318}
   m_Layer: 0
-  m_Name: EnemySpawner (1)
+  m_Name: StalkerSpawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40517,6 +40517,97 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7799383357312795697, guid: 85f82b19d4eb5564f8c0bcc731a07849, type: 3}
   m_PrefabInstance: {fileID: 615273462}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &615886626
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 615886627}
+  - component: {fileID: 615886629}
+  - component: {fileID: 615886628}
+  m_Layer: 0
+  m_Name: LightOut
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &615886627
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615886626}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 94.92743, y: 0.16718, z: 72.71398}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &615886628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615886626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f3731bb5e1b46e2bc546a5443425fbd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DeactivateGameObjectOnButtonClick
+  targetToDeactivate: {fileID: 1404992366}
+  deactivateKey: 108
+--- !u!114 &615886629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615886626}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 0}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &616046748
 GameObject:
   m_ObjectHideFlags: 0
@@ -51867,6 +51958,82 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 120929182718230310, guid: 36fcf9f9325ba2b46ac722832c63ee69, type: 3}
   m_PrefabInstance: {fileID: 789350561}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &789533925
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 789533926}
+  - component: {fileID: 789533928}
+  - component: {fileID: 789533927}
+  m_Layer: 0
+  m_Name: PatrolSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &789533926
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789533925}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 18.93, y: 1, z: -24.86}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1875349709}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &789533927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789533925}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc6a11584024ef49fc8cf9912c1b347, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TestSpawner
+  ShowTopMostFoldoutHeaderGroup: 1
+  prefabToSpawn: {fileID: 4573631869376184610, guid: 3aaf89b5645c16b42a4fa093c78bddf4, type: 3}
+  autoCollectSpawnPoints: 1
+  randomSpawnPoint: 0
+  spawnPoints:
+  - {fileID: 0}
+--- !u!114 &789533928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 789533925}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 151805440
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1001 &789879021
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -88932,8 +89099,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1404992366}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: -40.244934, y: 0.0055470467, z: -64.140884}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -88963,7 +89130,7 @@ Transform:
   - {fileID: 500172839}
   - {fileID: 730375772}
   - {fileID: 1166533853}
-  m_Father: {fileID: 1804839013}
+  m_Father: {fileID: 1653919841}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1405033700
 PrefabInstance:
@@ -106226,6 +106393,7 @@ Transform:
   - {fileID: 695435000}
   - {fileID: 418220039}
   - {fileID: 1112344318}
+  - {fileID: 1404992367}
   - {fileID: 552617664}
   - {fileID: 1928799860}
   m_Father: {fileID: 0}
@@ -115147,7 +115315,6 @@ Transform:
   - {fileID: 944364342}
   - {fileID: 2024322176}
   - {fileID: 1171655397}
-  - {fileID: 1404992367}
   m_Father: {fileID: 1653919841}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1001 &1805595498
@@ -119898,6 +120065,7 @@ Transform:
   - {fileID: 1170868111}
   - {fileID: 266109266}
   - {fileID: 465526320}
+  - {fileID: 789533926}
   m_Father: {fileID: 1653919841}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1001 &1875807352
@@ -137599,7 +137767,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.WorldItem
   ShowTopMostFoldoutHeaderGroup: 1
-  itemData: {fileID: 11400000, guid: 479d698337bddb14e8b375a84b4ae495, type: 2}
+  itemData: {fileID: 11400000, guid: 70e7c700d1fbc63858f826ed4b793e3a, type: 2}
   highlightEffect: {fileID: 0}
   scanPulseScale: 1.2
   scanPulseDuration: 0.25
@@ -137752,3 +137920,4 @@ SceneRoots:
   - {fileID: 1219844041}
   - {fileID: 185685057}
   - {fileID: 57321634}
+  - {fileID: 615886627}

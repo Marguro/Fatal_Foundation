@@ -330,14 +330,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemies.PatrolChaserAI
   ShowTopMostFoldoutHeaderGroup: 1
   patrolSpeed: 2.5
-  chaseSpeed: 4.5
-  patrolWaitTime: 1.25
+  chaseSpeed: 3
+  patrolWaitTime: 5
   patrolPointReachedDistance: 0.5
-  visionRange: 14
-  visionAngle: 60
-  loseTargetDistance: 22
+  visionRange: 5.2
+  visionAngle: 45
   scanInterval: 0.2
+  chaseDuration: 10
   attackRange: 1
+  attackDamage: 20
   patrolPoints:
   - {fileID: 0}
-  randomPatrolRadius: 8
+  randomPatrolRadius: 15

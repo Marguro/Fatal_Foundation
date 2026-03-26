@@ -17,7 +17,7 @@ MonoBehaviour:
   worldPrefab: {fileID: 4106258002126495490, guid: 0da58ce31898d0345bea90390da0d6ef, type: 3}
   handPrefab: {fileID: 4106258002126495490, guid: d2e03280223734043b1c8e3165feeab6, type: 3}
   weight: 1
-  scrapValue: 20
+  scrapValue: 40
   isTwoHanded: 0
   useHandAnchorRotationOverride: 0
   handAnchorRotationEuler: {x: 0, y: 0, z: 0}

@@ -225,7 +225,7 @@ MonoBehaviour:
   chargeSpeed: 8
   closeDistance: 5
   chargeStartDistance: 8
-  loopCooldown: 5
+  loopCooldown: 10
   detectionAngle: 30
   maxDetectionDistance: 25
 --- !u!1 &6907384435082340331
