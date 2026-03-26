@@ -384,7 +384,6 @@ MonoBehaviour:
   firstPersonController: {fileID: 2503924845779896671}
   starterAssetsInputs: {fileID: 9169566039981481917}
   playerInput: {fileID: 2382947447953547117}
-  playerInventory: {fileID: 6932498809128189027}
   interactionSystem: {fileID: 8478105761366780714}
   groundItemScanner: {fileID: 0}
   playerFollowCamera: {fileID: 3170168950744598181}
@@ -445,7 +444,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Trading.SilverCurrency
   ShowTopMostFoldoutHeaderGroup: 1
-  startingSilver: 100
+  startingSilver: 0
 --- !u!114 &-2198356894319103603
 MonoBehaviour:
   m_ObjectHideFlags: 0
