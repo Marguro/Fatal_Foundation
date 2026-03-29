@@ -27,6 +27,8 @@ namespace Enemies
         [SerializeField] private float chargeStartDistance = 8f;
         [Tooltip("Cooldown before hunting again after fleeing")]
         [SerializeField] private float loopCooldown = 5.0f;
+        [Tooltip("Time stared at before provoking a charge")]
+        [SerializeField] private float provokeTime = 10f;
         [Tooltip("Angle cone in front of player to detect Stalker (degrees)")]
         [SerializeField] private float detectionAngle = 60f;
         [Tooltip("Max distance player can see Stalker")]
@@ -40,6 +42,7 @@ namespace Enemies
         private StalkerState _currentState = StalkerState.Hunting;
         private float _stateTimer;
         private float _stareCounter;
+        private float _timeBeingStaredAt;
 
         public override void OnNetworkSpawn()
         {
@@ -101,6 +104,28 @@ namespace Enemies
             {
                 FindNearestPlayer();
                 if (_targetPlayer == null) return; // No players found
+            }
+
+            // --- Provoke Logic: Charge if being stared at too long ---
+            if (_currentState != StalkerState.Charging)
+            {
+                if (IsSeenByPlayer(out Transform starer))
+                {
+                    _timeBeingStaredAt += Time.deltaTime;
+                    if (_timeBeingStaredAt >= provokeTime)
+                    {
+                        Debug.Log("Stalker provoked by staring! Charging!");
+                        _timeBeingStaredAt = 0f;
+                        _targetPlayer = starer; // Focus on the one who provoked it
+                        TransitionTo(StalkerState.Charging);
+                        return; // Skip normal update this frame
+                    }
+                }
+                else
+                {
+                    // Decay the timer so it requires somewhat consistent staring
+                    _timeBeingStaredAt = Mathf.Max(0, _timeBeingStaredAt - Time.deltaTime);
+                }
             }
 
             switch (_currentState)
@@ -178,6 +203,12 @@ namespace Enemies
 
         private bool IsSeenByPlayer()
         {
+            return IsSeenByPlayer(out _);
+        }
+
+        private bool IsSeenByPlayer(out Transform starer)
+        {
+            starer = null;
             List<Transform> players = GetPlayerCandidates();
             
             foreach (Transform viewer in players)
@@ -202,7 +233,11 @@ namespace Enemies
                      if (Physics.Raycast(viewerPos, dirToStalker, out RaycastHit hit, maxDetectionDistance))
                      {
                          // If we hit the stalker (or part of it), it's seen
-                         if (hit.transform == transform || hit.transform.IsChildOf(transform)) return true;
+                         if (hit.transform == transform || hit.transform.IsChildOf(transform))
+                         {
+                             starer = viewer;
+                             return true;
+                         }
                      }
                 }
             }
@@ -253,24 +288,7 @@ namespace Enemies
                     break;
                 case StalkerState.Fleeing:
                     _enemyBase.MoveSpeed = fleeSpeed;
-                    
-                    if (_targetPlayer)
-                    {
-                        // Calculate flee position away from player
-                        Vector3 evadeDir = (transform.position - _targetPlayer.position).normalized;
-                        Vector3 fleePos = transform.position + evadeDir * fleeDistance;
-                        
-                        NavMeshHit hit;
-                        if (NavMesh.SamplePosition(fleePos, out hit, 10f, NavMesh.AllAreas))
-                        {
-                            _enemyBase.MoveTo(hit.position);
-                        }
-                        else
-                        {
-                            // Fallback if NavMesh not found exactly there
-                            _enemyBase.MoveTo(transform.position + evadeDir * 5f);
-                        }
-                    }
+                    SetFleeDestination();
                     break;
                 case StalkerState.Cooldown:
                     _enemyBase.StopMoving();
@@ -389,14 +407,44 @@ namespace Enemies
              }
         }
         
+        private void SetFleeDestination()
+        {
+            if (_targetPlayer)
+            {
+                // Calculate flee position away from player
+                Vector3 evadeDir = (transform.position - _targetPlayer.position).normalized;
+                Vector3 fleePos = transform.position + evadeDir * fleeDistance;
+                
+                if (NavMesh.SamplePosition(fleePos, out NavMeshHit hit, 10f, NavMesh.AllAreas))
+                {
+                    _enemyBase.MoveTo(hit.position);
+                }
+                else
+                {
+                    // Fallback if NavMesh not found exactly there
+                    _enemyBase.MoveTo(transform.position + evadeDir * 5f);
+                }
+            }
+        }
+
         private void UpdateFleeing()
         {
             // Check if reached destination or far enough
             if (_enemyBase.Agent != null && _enemyBase.Agent.isOnNavMesh)
             {
-                if (_enemyBase.Agent.remainingDistance < 1f)
+                // Wait until the path is calculated, then check if we reached the destination
+                if (!_enemyBase.Agent.pathPending && _enemyBase.Agent.remainingDistance < 1f)
                 {
-                    TransitionTo(StalkerState.Cooldown);
+                    // IF STILL SEEN BY ANY PLAYER, KEEP FLEEING!
+                    if (IsSeenByPlayer())
+                    {
+                        SetFleeDestination();
+                    }
+                    else
+                    {
+                        // Safely out of sight or reached destination unseen
+                        TransitionTo(StalkerState.Cooldown);
+                    }
                 }
             }
             else
