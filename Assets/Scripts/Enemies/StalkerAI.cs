@@ -178,31 +178,33 @@ namespace Enemies
 
         private bool IsSeenByPlayer()
         {
-            if (_targetPlayer == null) return false;
-
-            // Use Camera.main if available for more accurate view detection (FPS/TPS)
-            Transform viewer = Camera.main != null ? Camera.main.transform : _targetPlayer;
-
-            // Distance check
-            float dist = Vector3.Distance(transform.position, viewer.position);
-            if (dist > maxDetectionDistance) return false;
+            List<Transform> players = GetPlayerCandidates();
             
-            // Check if Stalker is within player's forward cone
-            Vector3 dirToStalker = (transform.position - viewer.position).normalized;
-            float angle = Vector3.Angle(viewer.forward, dirToStalker);
-            
-            // If angle is small enough, player is looking primarily at Stalker
-            if (angle < detectionAngle)
+            foreach (Transform viewer in players)
             {
-                 // Simple line of sight check
-                 RaycastHit hit;
-                 // Raycast from viewer position
-                 if (Physics.Raycast(viewer.position, dirToStalker, out hit, maxDetectionDistance))
-                 {
-                     // If we hit the stalker (or part of it), it's seen
-                     // We check root or transform match
-                     if (hit.transform == transform || hit.transform.IsChildOf(transform)) return true;
-                 }
+                if (viewer == null) continue;
+
+                // This runs on the server. We use each player's transform and an eye-level offset.
+                Vector3 viewerPos = viewer.position + Vector3.up * 1.5f;
+
+                // Distance check
+                float dist = Vector3.Distance(transform.position, viewerPos);
+                if (dist > maxDetectionDistance) continue;
+                
+                // Check if Stalker is within this player's forward cone
+                Vector3 dirToStalker = (transform.position - viewerPos).normalized;
+                float angle = Vector3.Angle(viewer.forward, dirToStalker);
+                
+                // If angle is small enough, this player is looking primarily at Stalker
+                if (angle < detectionAngle)
+                {
+                     // Simple line of sight check
+                     if (Physics.Raycast(viewerPos, dirToStalker, out RaycastHit hit, maxDetectionDistance))
+                     {
+                         // If we hit the stalker (or part of it), it's seen
+                         if (hit.transform == transform || hit.transform.IsChildOf(transform)) return true;
+                     }
+                }
             }
             return false;
         }

@@ -316,6 +316,10 @@ MonoBehaviour:
   moveSpeed: 3.5
   defaultDamage: 10
   attackCooldown: 1
+  syncInterval: 0.05
+  positionSyncThreshold: 0.01
+  rotationSyncThreshold: 0.5
+  clientSmoothing: 15
 --- !u!114 &7884553547959599484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,7 +342,7 @@ MonoBehaviour:
   scanInterval: 0.2
   chaseDuration: 10
   attackRange: 1
-  attackDamage: 20
+  attackDamage: 100
   patrolPoints:
   - {fileID: 0}
   randomPatrolRadius: 15
