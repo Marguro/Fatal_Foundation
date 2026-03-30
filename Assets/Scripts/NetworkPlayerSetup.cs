@@ -19,6 +19,8 @@ public class NetworkPlayerSetup : NetworkBehaviour
         [SerializeField] private PlayerInput playerInput;
         [SerializeField] private InteractionSystem interactionSystem;
         [SerializeField] private GroundItemScanner groundItemScanner;
+        [SerializeField] private PlayerUI playerUI;
+        [SerializeField] private GameObject canvasStatus;
 
         [Header("Camera (disabled on remote players)")]
         [Tooltip("Drag 'PlayerFollowCamera' child GameObject here")]
@@ -38,14 +40,18 @@ public class NetworkPlayerSetup : NetworkBehaviour
             playerInput           = GetComponent<PlayerInput>();
             interactionSystem     = GetComponent<InteractionSystem>();
             groundItemScanner     = GetComponent<GroundItemScanner>();
+            playerUI              = GetComponentInChildren<PlayerUI>();
 
-            // หา PlayerFollowCamera ใน children
-            foreach (Transform child in transform)
+            // หา PlayerFollowCamera และ Canvas_Status ใน children
+            foreach (Transform child in GetComponentsInChildren<Transform>(true))
             {
                 if (child.name == "PlayerFollowCamera")
                 {
                     playerFollowCamera = child.gameObject;
-                    break;
+                }
+                else if (child.name == "Canvas_Status")
+                {
+                    canvasStatus = child.gameObject;
                 }
             }
         }
@@ -68,12 +74,11 @@ public class NetworkPlayerSetup : NetworkBehaviour
             // Keep PlayerInventory enabled for remote visual sync (held item + flashlight state).
             if (interactionSystem != null) interactionSystem.enabled = false;
             if (groundItemScanner != null) groundItemScanner.enabled = false;
+            if (playerUI          != null) playerUI.gameObject.SetActive(false);
+            if (canvasStatus      != null) canvasStatus.SetActive(false);
 
             // ปิด Cinemachine Follow Camera ของ remote player
             // ถ้าเปิดทิ้งไว้ CinemachineBrain บนกล้องหลักจะยึดกล้องของ remote player แทน
             if (playerFollowCamera != null) playerFollowCamera.SetActive(false);
         }
 }
-
-
-

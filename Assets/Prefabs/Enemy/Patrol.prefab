@@ -341,8 +341,8 @@ MonoBehaviour:
   visionAngle: 45
   scanInterval: 0.2
   chaseDuration: 10
-  attackRange: 1
-  attackDamage: 100
+  attackRange: 1.5
+  attackDamage: 50
   patrolPoints:
   - {fileID: 0}
   randomPatrolRadius: 15

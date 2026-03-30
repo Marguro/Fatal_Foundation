@@ -132,11 +132,25 @@ namespace StarterAssets.FirstPersonController.Scripts
 			CameraRotation();
 		}
 
+		private readonly Collider[] _overlapColliders = new Collider[10];
+
 		private void GroundedCheck()
 		{
 			// set sphere position, with offset
 			Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
-			Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
+			
+			int count = Physics.OverlapSphereNonAlloc(spherePosition, GroundedRadius, _overlapColliders, GroundLayers, QueryTriggerInteraction.Ignore);
+			bool isGrounded = false;
+			for (int i = 0; i < count; i++)
+			{
+				Collider col = _overlapColliders[i];
+				if (col != _controller && !col.transform.IsChildOf(transform))
+				{
+					isGrounded = true;
+					break;
+				}
+			}
+			Grounded = isGrounded;
 		}
 
 		private void CameraRotation()

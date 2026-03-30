@@ -157,6 +157,12 @@ namespace Enemies
                 return;
             }
 
+            bool inSight = HasLineOfSight(targetPlayer);
+            if (inSight)
+            {
+                chaseEndTime = Time.time + chaseDuration;
+            }
+
             if (Time.time >= chaseEndTime)
             {
                 targetPlayer = null;
@@ -168,7 +174,7 @@ namespace Enemies
 
             enemyBase.MoveTo(targetPlayer.position);
 
-            if (distanceToTarget <= attackRange && HasLineOfSight(targetPlayer))
+            if (distanceToTarget <= attackRange && inSight)
             {
                 if (TryGetHealthSystem(targetPlayer, out HealthSystem targetHealth))
                 {
@@ -340,7 +346,7 @@ namespace Enemies
             RaycastHit[] hits = Physics.RaycastAll(origin, direction, distance);
             if (hits == null || hits.Length == 0)
             {
-                return false;
+                return true;
             }
 
             System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
@@ -376,13 +382,17 @@ namespace Enemies
             }
         }
 
+        private void OnDrawGizmos()
+        {
+            // แสดงวงกลมระยะโจมตีตลอดเวลาด้วยสีแดง
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, attackRange);
+        }
+
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(0.2f, 0.8f, 1f, 0.25f);
             Gizmos.DrawWireSphere(transform.position, visionRange);
-
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, attackRange);
 
             Vector3 leftRay = Quaternion.Euler(0f, -visionAngle * 0.5f, 0f) * transform.forward;
             Vector3 rightRay = Quaternion.Euler(0f, visionAngle * 0.5f, 0f) * transform.forward;
@@ -393,5 +403,4 @@ namespace Enemies
         }
     }
 }
-
 
