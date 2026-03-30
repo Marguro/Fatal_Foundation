@@ -333,11 +333,11 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   animator: {fileID: 0}
   patrolSpeed: 3
-  chaseSpeed: 5
+  chaseSpeed: 4
   patrolWaitTime: 5
   patrolPointReachedDistance: 0.5
   visionRange: 5.2
-  visionAngle: 45
+  visionAngle: 75
   scanInterval: 0.2
   chaseDuration: 10
   attackRange: 1.11
