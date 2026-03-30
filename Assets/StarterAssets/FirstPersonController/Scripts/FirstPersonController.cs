@@ -73,6 +73,14 @@ namespace StarterAssets.FirstPersonController.Scripts
 		
 		private StaminaSystem _staminaSystem;
 
+		private Animator _animator;
+		private bool _hasAnimator;
+
+		// animation IDs
+		private int _animIDSpeed;
+		private int _animIDIsRunning;
+		private int _animIDInteract;
+
 #if ENABLE_INPUT_SYSTEM
 		private PlayerInput _playerInput;
 #endif
@@ -105,6 +113,8 @@ namespace StarterAssets.FirstPersonController.Scripts
 		private void Start()
 		{
 			_controller = GetComponent<CharacterController>();
+			_hasAnimator = TryGetComponent(out _animator);
+			AssignAnimationIDs();
 			
 			// Sync StandHeight with the CharacterController's initial height to prevent it from resetting
 			StandHeight = _controller.height;
@@ -121,6 +131,13 @@ namespace StarterAssets.FirstPersonController.Scripts
 			_jumpTimeoutDelta = JumpTimeout;
 			_fallTimeoutDelta = FallTimeout;
 			_cameraStandLocalY = CinemachineCameraTarget.transform.localPosition.y;
+		}
+
+		private void AssignAnimationIDs()
+		{
+			_animIDSpeed = Animator.StringToHash("Speed");
+			_animIDIsRunning = Animator.StringToHash("IsRunning");
+			_animIDInteract = Animator.StringToHash("Interact");
 		}
 
 		private void Update()
@@ -268,6 +285,20 @@ namespace StarterAssets.FirstPersonController.Scripts
 
 			// move the player
 			_controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+
+			if (_hasAnimator)
+			{
+				_animator.SetFloat(_animIDSpeed, _speed);
+				_animator.SetBool(_animIDIsRunning, isSprinting);
+			}
+		}
+
+		public void TriggerInteractAnimation()
+		{
+			if (_hasAnimator)
+			{
+				_animator.SetTrigger(_animIDInteract);
+			}
 		}
 
 		private void Crouch()
