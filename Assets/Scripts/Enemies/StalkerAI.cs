@@ -36,6 +36,9 @@ namespace Enemies
 
         [Header("Animation")]
         [SerializeField] private Animator animator;
+        [Tooltip("The movement speed at which the running animation plays at 1x speed")]
+        [SerializeField] private float baseRunAnimationSpeed = 3.5f;
+
         private Vector3 _lastPosition;
 
         private EnemyBase _enemyBase;
@@ -47,6 +50,7 @@ namespace Enemies
         private float _stateTimer;
         private float _stareCounter;
         private float _timeBeingStaredAt;
+        private float _currentSpeed;
 
         public override void OnNetworkSpawn()
         {
@@ -94,8 +98,14 @@ namespace Enemies
             // Animation logic runs on both Server and Client
             if (animator != null)
             {
-                float speed = (transform.position - _lastPosition).magnitude / Time.deltaTime;
-                animator.SetFloat("Speed", speed);
+                float rawSpeed = (transform.position - _lastPosition).magnitude / Time.deltaTime;
+                // Smooth the speed to prevent animation jittering due to network/lerp updates
+                _currentSpeed = Mathf.Lerp(_currentSpeed, rawSpeed, Time.deltaTime * 10f);
+                animator.SetFloat("Speed", _currentSpeed);
+
+                // Sync animation play speed with movement speed
+                float runMultiplier = _currentSpeed / Mathf.Max(0.1f, baseRunAnimationSpeed);
+                animator.SetFloat("RunMultiplier", Mathf.Max(0.1f, runMultiplier));
             }
             _lastPosition = transform.position;
 

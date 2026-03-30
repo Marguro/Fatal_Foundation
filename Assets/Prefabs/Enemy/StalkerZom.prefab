@@ -1627,6 +1627,7 @@ MonoBehaviour:
   detectionAngle: 30
   maxDetectionDistance: 25
   animator: {fileID: 223454268903525208}
+  baseRunAnimationSpeed: 3.5
 --- !u!136 &827778163505605186
 CapsuleCollider:
   m_ObjectHideFlags: 0
