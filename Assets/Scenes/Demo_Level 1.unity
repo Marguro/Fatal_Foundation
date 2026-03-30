@@ -38503,7 +38503,7 @@ Transform:
   m_GameObject: {fileID: 597687745}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.9625, z: 0}
+  m_LocalPosition: {x: 116.581, y: 1.7317415, z: 51.231}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -67874,7 +67874,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1061170330}
-    PlayerPrefab: {fileID: 2153596515888635933, guid: 52e61a01b58a98c0ab58b3ea3a006bf2, type: 3}
+    PlayerPrefab: {fileID: 4492199999873088989, guid: 529155ec7c3e39e40853a7299a5f5a9c, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 6802b0788c25951c3a75d07630800371, type: 2}
@@ -76999,7 +76999,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1219844041
 Transform:
   m_ObjectHideFlags: 0
@@ -99064,8 +99064,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1548773138}
-  - component: {fileID: 1548773139}
   - component: {fileID: 1548773140}
+  - component: {fileID: 1548773139}
   m_Layer: 0
   m_Name: SoulOrbManager
   m_TagString: Untagged

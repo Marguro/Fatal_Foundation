@@ -105,6 +105,10 @@ namespace StarterAssets.FirstPersonController.Scripts
 		private void Start()
 		{
 			_controller = GetComponent<CharacterController>();
+			
+			// Sync StandHeight with the CharacterController's initial height to prevent it from resetting
+			StandHeight = _controller.height;
+			
 			_input = GetComponent<StarterAssetsInputs>();
 			_staminaSystem = GetComponent<StaminaSystem>();
 #if ENABLE_INPUT_SYSTEM
@@ -161,7 +165,7 @@ namespace StarterAssets.FirstPersonController.Scripts
 				//Don't multiply mouse input by Time.deltaTime
 				float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
 				
-				_cinemachineTargetPitch += _input.look.y * RotationSpeed * deltaTimeMultiplier;
+				_cinemachineTargetPitch -= _input.look.y * RotationSpeed * deltaTimeMultiplier;
 				_rotationVelocity = _input.look.x * RotationSpeed * deltaTimeMultiplier;
 
 				// clamp our pitch rotation
@@ -177,15 +181,49 @@ namespace StarterAssets.FirstPersonController.Scripts
 
 		private void Move()
 		{
+#if ENABLE_INPUT_SYSTEM
+			// Ensure _input.sprint correctly reflects the physical button state 
+			// and doesn't get stuck due to Unity Input System event bugs
+			if (_playerInput != null && _playerInput.actions != null)
+			{
+				var sprintAction = _playerInput.actions.FindAction("Sprint");
+				if (sprintAction != null)
+				{
+					// Only force update if stamina allows, otherwise we might forcefully sprint when empty
+					bool isPhysicallyPressed = sprintAction.IsPressed();
+					if (!isPhysicallyPressed) 
+					{
+						_input.sprint = false;
+					}
+					else if (_input.sprint == false && isPhysicallyPressed)
+					{
+						_input.sprint = true;
+					}
+				}
+			}
+#endif
+
 			// set target speed based on move speed, sprint speed and if sprint is pressed
             bool isSprinting = _input.sprint;
 
-            if (isSprinting && _input.move != Vector2.zero && _staminaSystem != null)
+            // Only sprint if moving and not crouching
+            if (isSprinting && _input.move != Vector2.zero && !_isCrouching)
             {
-                if (!_staminaSystem.TryConsumeStaminaContinuous(_staminaSystem.SprintCostPerSecond))
+                if (_staminaSystem != null)
                 {
-                    isSprinting = false;
+                    // Try to consume stamina
+                    if (!_staminaSystem.TryConsumeStaminaContinuous(_staminaSystem.SprintCostPerSecond))
+                    {
+                        // Run out of stamina -> cancel sprinting
+                        isSprinting = false;
+                        _input.sprint = false; 
+                    }
                 }
+            }
+            else
+            {
+                // Force false if crouching or not moving, so we don't sprint visually or logically
+                isSprinting = false;
             }
 
 			float targetSpeed = _isCrouching ? CrouchMoveSpeed : (isSprinting ? SprintSpeed : MoveSpeed);
@@ -315,3 +353,4 @@ namespace StarterAssets.FirstPersonController.Scripts
 		}
 	}
 }
+
