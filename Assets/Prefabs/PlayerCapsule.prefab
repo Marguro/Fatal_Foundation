@@ -431,6 +431,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 356d30b6ef60726c195d6d1bce58e3db, type: 2}
   - {fileID: 11400000, guid: 479d698337bddb14e8b375a84b4ae495, type: 2}
   - {fileID: 11400000, guid: aeea7f15c95a250409bbceb3dfe25757, type: 2}
+  - {fileID: 11400000, guid: 6efffe990dcfb064590e57f25ead7468, type: 2}
   flashlightItemData: {fileID: 11400000, guid: 356d30b6ef60726c195d6d1bce58e3db, type: 2}
   weightMultiplier: 0.5
   minMoveSpeed: 0.5

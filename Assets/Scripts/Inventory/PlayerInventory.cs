@@ -14,6 +14,7 @@ namespace Inventory
         public static PlayerInventory Instance { get; private set; }
 
         public static event System.Action<PlayerInventory> OnLocalInstanceReady;
+        public static event System.Action<ItemData> OnItemPickedUpEvent;
 
         [BoxGroup("Hand Anchor")]
         [SerializeField] private Transform handAnchor;
@@ -344,17 +345,23 @@ namespace Inventory
 
         public bool PickUpItem(ItemData item)
         {
-            for (int i = 0; i < _slots.Length; i++)
+            if (!IsOwner) return false;
+
+            for (int i = 0; i < SlotCount; i++)
             {
                 if (_slots[i] == null)
                 {
                     _slots[i] = item;
-                    if (i == _currentSlotIndex) UpdateHandItem();
+                    if (i == _currentSlotIndex)
+                    {
+                        UpdateHandItem();
+                    }
                     OnInventoryChanged?.Invoke();
+                    OnItemPickedUpEvent?.Invoke(item);
                     return true;
                 }
             }
-            Debug.Log("[PlayerInventory] Inventory is full.้");
+
             return false;
         }
 

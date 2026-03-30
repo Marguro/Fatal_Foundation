@@ -64,6 +64,18 @@ namespace Enemies
             enemyBase.MoveSpeed = patrolSpeed;
         }
 
+        public void SetPatrolPoints(Transform[] newPoints)
+        {
+            patrolPoints = newPoints;
+            currentPatrolIndex = 0;
+            // Optionally force return to patrol right away
+            if (currentState == State.Patrolling)
+            {
+                isWaitingAtPatrolPoint = false;
+                nextPatrolMoveTime = Time.time;
+            }
+        }
+
         private void Update()
         {
             if (!IsServer || enemyBase == null) return;
