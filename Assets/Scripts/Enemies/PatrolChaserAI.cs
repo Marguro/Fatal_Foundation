@@ -9,6 +9,11 @@ namespace Enemies
     [RequireComponent(typeof(EnemyBase))]
     public class PatrolChaserAI : NetworkBehaviour
     {
+        [Header("Animation")]
+        [SerializeField] private Animator animator;
+        private readonly int speedAnimParam = Animator.StringToHash("Speed");
+        private readonly int attackAnimParam = Animator.StringToHash("Attack");
+
         [Header("Movement")]
         [SerializeField] private float patrolSpeed = 2.5f;
         [SerializeField] private float chaseSpeed = 4.5f;
@@ -60,6 +65,8 @@ namespace Enemies
             }
 
             enemyBase = GetComponent<EnemyBase>();
+            if (animator == null) animator = GetComponentInChildren<Animator>();
+            
             spawnPoint = transform.position;
             enemyBase.MoveSpeed = patrolSpeed;
         }
@@ -110,6 +117,17 @@ namespace Enemies
                     UpdateReturnToPatrol();
                     break;
             }
+
+            UpdateAnimation();
+        }
+
+        private void UpdateAnimation()
+        {
+            if (animator == null || enemyBase.Agent == null) return;
+            
+            // อัปเดตความเร็วลงใน Animator
+            float currentVelocity = enemyBase.Agent.velocity.magnitude;
+            animator.SetFloat(speedAnimParam, currentVelocity);
         }
 
         private void UpdatePatrol()
@@ -191,6 +209,10 @@ namespace Enemies
                 if (TryGetHealthSystem(targetPlayer, out HealthSystem targetHealth))
                 {
                     enemyBase.AttackTarget(targetHealth, attackDamage);
+                    if (animator != null) animator.SetTrigger(attackAnimParam);
+                    
+                    // หน่วงเวลาไม่ให้โจมตีรัวเกินไป (ถ้าระบบ EnemyBase ยังไม่มี cooldown)
+                    enemyBase.StopMoving();
                 }
             }
         }
