@@ -6,7 +6,7 @@ namespace Trading
     public class SilverCurrencyTextUI : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI silverText;
-        [SerializeField] private string textFormat = "Silver: {0}";
+        [SerializeField] private string textFormat = "Silver {0}/400";
         [SerializeField] private SilverCurrency targetCurrency;
 
         private SilverCurrency _boundCurrency;

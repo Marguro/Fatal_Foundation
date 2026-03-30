@@ -418,6 +418,19 @@ namespace Inventory
         }
 
         [ServerRpc]
+        public void DealDamageServerRpc(ulong targetNetworkObjectId, float damage)
+        {
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetNetworkObjectId, out NetworkObject targetNetObj))
+            {
+                var health = targetNetObj.GetComponent<HealthSystem>();
+                if (health != null)
+                {
+                    health.TakeDamage(damage);
+                }
+            }
+        }
+
+        [ServerRpc]
         private void RequestDropItemServerRpc(string itemName, bool droppedFlashlightState)
         {
              ItemData data = allGameItems.FirstOrDefault(i => i.itemName == itemName);
