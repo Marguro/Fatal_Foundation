@@ -34,6 +34,11 @@ namespace Inventory
             NetworkVariableReadPermission.Everyone,
             NetworkVariableWritePermission.Owner);
 
+        public readonly NetworkVariable<int> NetSoulOrbCount = new NetworkVariable<int>(
+            0,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Owner);
+
         [BoxGroup("Weight Settings")]
         [SerializeField] private float weightMultiplier = 0.5f;
         [BoxGroup("Weight Settings")]
@@ -107,6 +112,8 @@ namespace Inventory
                 return;
             }
 
+            OnInventoryChanged += UpdateSoulOrbCount;
+
             Instance = this;
             OnLocalInstanceReady?.Invoke(this);
 
@@ -128,8 +135,26 @@ namespace Inventory
             _netCurrentItemName.OnValueChanged -= OnHeldItemChanged;
             _netFlashlightEnabled.OnValueChanged -= OnFlashlightStateChanged;
             _netLookPitch.OnValueChanged -= OnLookPitchChanged;
+            if (IsOwner)
+            {
+                OnInventoryChanged -= UpdateSoulOrbCount;
+            }
             if (IsOwner && Instance == this)
                 Instance = null;
+        }
+
+        private void UpdateSoulOrbCount()
+        {
+            if (!IsOwner) return;
+            int count = 0;
+            foreach (var item in _slots)
+            {
+                if (item is SoulOrbItemData)
+                {
+                    count++;
+                }
+            }
+            NetSoulOrbCount.Value = count;
         }
 
         private void OnHeldItemChanged(FixedString64Bytes oldName, FixedString64Bytes newName)

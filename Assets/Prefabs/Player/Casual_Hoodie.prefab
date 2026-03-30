@@ -2352,7 +2352,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Trading.SilverCurrency
   ShowTopMostFoldoutHeaderGroup: 1
-  startingSilver: 0
+  startingSilver: 380
 --- !u!95 &-7370172745658722731
 Animator:
   serializedVersion: 7

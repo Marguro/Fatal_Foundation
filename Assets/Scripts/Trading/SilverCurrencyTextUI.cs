@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using Inventory;
 
 namespace Trading
 {
@@ -7,6 +8,7 @@ namespace Trading
     {
         [SerializeField] private TextMeshProUGUI silverText;
         [SerializeField] private string textFormat = "Silver {0}/400";
+        [SerializeField] private string soulOrbFormat = "SoulOrb {0}/1";
         [SerializeField] private SilverCurrency targetCurrency;
 
         private SilverCurrency _boundCurrency;
@@ -28,6 +30,11 @@ namespace Trading
             if (_boundCurrency == null)
             {
                 TryBindCurrency();
+            }
+
+            if (_boundCurrency != null && _boundCurrency.SilverCount >= 400)
+            {
+                RefreshText(_boundCurrency.SilverCount);
             }
         }
 
@@ -103,8 +110,24 @@ namespace Trading
         private void RefreshText(int amount)
         {
             if (silverText == null) return;
-            silverText.text = string.Format(textFormat, amount);
+            
+            if (amount >= 400)
+            {
+                int totalSoulOrbs = 0;
+                PlayerInventory[] allInventories = Object.FindObjectsByType<PlayerInventory>(FindObjectsSortMode.None);
+                foreach (var inv in allInventories)
+                {
+                    if (inv != null)
+                    {
+                        totalSoulOrbs += inv.NetSoulOrbCount.Value;
+                    }
+                }
+                silverText.text = string.Format(soulOrbFormat, totalSoulOrbs > 0 ? 1 : 0);
+            }
+            else
+            {
+                silverText.text = string.Format(textFormat, amount);
+            }
         }
     }
 }
-
