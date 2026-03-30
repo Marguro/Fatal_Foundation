@@ -46,6 +46,7 @@ namespace Enemies
         private float nextScanTime;
         private float chaseEndTime;
         private bool isWaitingAtPatrolPoint;
+        private Vector3 lastPosition;
 
         private enum State
         {
@@ -58,14 +59,15 @@ namespace Enemies
 
         public override void OnNetworkSpawn()
         {
+            if (animator == null) animator = GetComponentInChildren<Animator>();
+            lastPosition = transform.position;
+
             if (!IsServer)
             {
-                enabled = false;
                 return;
             }
 
             enemyBase = GetComponent<EnemyBase>();
-            if (animator == null) animator = GetComponentInChildren<Animator>();
             
             spawnPoint = transform.position;
             enemyBase.MoveSpeed = patrolSpeed;
@@ -85,7 +87,13 @@ namespace Enemies
 
         private void Update()
         {
-            if (!IsServer || enemyBase == null) return;
+            if (!IsServer)
+            {
+                UpdateAnimationClient();
+                return;
+            }
+
+            if (enemyBase == null) return;
 
             if (targetPlayer != null && !IsTargetValid(targetPlayer))
             {
@@ -118,16 +126,25 @@ namespace Enemies
                     break;
             }
 
-            UpdateAnimation();
+            UpdateAnimationServer();
         }
 
-        private void UpdateAnimation()
+        private void UpdateAnimationServer()
         {
             if (animator == null || enemyBase.Agent == null) return;
             
             // อัปเดตความเร็วลงใน Animator
             float currentVelocity = enemyBase.Agent.velocity.magnitude;
             animator.SetFloat(speedAnimParam, currentVelocity);
+        }
+
+        private void UpdateAnimationClient()
+        {
+            if (animator == null) return;
+
+            float currentVelocity = (transform.position - lastPosition).magnitude / Time.deltaTime;
+            animator.SetFloat(speedAnimParam, currentVelocity);
+            lastPosition = transform.position;
         }
 
         private void UpdatePatrol()
@@ -210,11 +227,19 @@ namespace Enemies
                 {
                     enemyBase.AttackTarget(targetHealth, attackDamage);
                     if (animator != null) animator.SetTrigger(attackAnimParam);
+                    PlayAttackAnimationClientRpc();
                     
                     // หน่วงเวลาไม่ให้โจมตีรัวเกินไป (ถ้าระบบ EnemyBase ยังไม่มี cooldown)
                     enemyBase.StopMoving();
                 }
             }
+        }
+
+        [ClientRpc]
+        private void PlayAttackAnimationClientRpc()
+        {
+            if (IsServer) return; // Server already played it
+            if (animator != null) animator.SetTrigger(attackAnimParam);
         }
 
         private void StartChase(Transform playerTarget)
