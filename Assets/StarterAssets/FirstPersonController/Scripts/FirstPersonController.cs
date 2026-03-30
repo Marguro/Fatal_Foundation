@@ -1,6 +1,10 @@
 ﻿using StarterAssets.InputSystem;
 using UnityEngine;
 using UnityEngine.InputSystem;
+#if ENABLE_INPUT_SYSTEM
+using Unity.Netcode;
+using Unity.Netcode.Components;
+#endif
 
 namespace StarterAssets.FirstPersonController.Scripts
 {
@@ -75,6 +79,7 @@ namespace StarterAssets.FirstPersonController.Scripts
 
 		private Animator _animator;
 		private bool _hasAnimator;
+		private NetworkAnimator _networkAnimator;
 
 		// animation IDs
 		private int _animIDSpeed;
@@ -114,6 +119,7 @@ namespace StarterAssets.FirstPersonController.Scripts
 		{
 			_controller = GetComponent<CharacterController>();
 			_hasAnimator = TryGetComponent(out _animator);
+			_networkAnimator = GetComponent<NetworkAnimator>();
 			AssignAnimationIDs();
 			
 			// Sync StandHeight with the CharacterController's initial height to prevent it from resetting
@@ -295,7 +301,11 @@ namespace StarterAssets.FirstPersonController.Scripts
 
 		public void TriggerInteractAnimation()
 		{
-			if (_hasAnimator)
+			if (_networkAnimator != null)
+			{
+				_networkAnimator.SetTrigger(_animIDInteract);
+			}
+			else if (_hasAnimator)
 			{
 				_animator.SetTrigger(_animIDInteract);
 			}
