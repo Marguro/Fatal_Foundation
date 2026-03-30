@@ -29866,7 +29866,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestSpawner
   ShowTopMostFoldoutHeaderGroup: 1
-  prefabToSpawn: {fileID: 6265542586836935902, guid: b3cd6101ae52cae49926be0318f85f3b, type: 3}
+  prefabToSpawn: {fileID: 6410153968826524886, guid: 02f3b4976bbf017459b235a4fe5cc4b5, type: 3}
   autoCollectSpawnPoints: 1
   randomSpawnPoint: 0
   spawnPoints:
@@ -29905,7 +29905,7 @@ Transform:
   m_GameObject: {fileID: 465526317}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 1.053, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -34,6 +34,10 @@ namespace Enemies
         [Tooltip("Max distance player can see Stalker")]
         [SerializeField] private float maxDetectionDistance = 25f;
 
+        [Header("Animation")]
+        [SerializeField] private Animator animator;
+        private Vector3 _lastPosition;
+
         private EnemyBase _enemyBase;
         private Transform _targetPlayer;
         
@@ -46,9 +50,11 @@ namespace Enemies
 
         public override void OnNetworkSpawn()
         {
+            _lastPosition = transform.position;
+
             if (!IsServer)
             {
-                enabled = false;
+                // Clients still need this enabled to run Update for animations
                 return;
             }
 
@@ -85,6 +91,14 @@ namespace Enemies
 
         private void Update()
         {
+            // Animation logic runs on both Server and Client
+            if (animator != null)
+            {
+                float speed = (transform.position - _lastPosition).magnitude / Time.deltaTime;
+                animator.SetFloat("Speed", speed);
+            }
+            _lastPosition = transform.position;
+
             if (!IsServer) return;
 
             // Ensure Agent is on NavMesh to prevent "not moving" and errors

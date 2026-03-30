@@ -205,6 +205,7 @@ GameObject:
   - component: {fileID: 2173148073379923225}
   - component: {fileID: 201168205274703039}
   - component: {fileID: -6167008975859669461}
+  - component: {fileID: -8494872407742693932}
   m_Layer: 0
   m_Name: PatrolZom
   m_TagString: Untagged
@@ -366,6 +367,29 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!136 &-8494872407742693932
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1922910032675716625}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.9889163
+  m_Height: 7.5917373
+  m_Direction: 1
+  m_Center: {x: -0.09255043, y: 3.5264025, z: 0.2607199}
 --- !u!1 &2212338410630191632
 GameObject:
   m_ObjectHideFlags: 0
