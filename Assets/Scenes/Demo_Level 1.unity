@@ -35012,6 +35012,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Floor_Lvl_1 (131)
       objectReference: {fileID: 0}
+    - target: {fileID: 7455473319430151819, guid: 85f82b19d4eb5564f8c0bcc731a07849, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7799383357312795697, guid: 85f82b19d4eb5564f8c0bcc731a07849, type: 3}
       propertyPath: m_LocalPosition.x
       value: -60.26
@@ -38503,7 +38507,7 @@ Transform:
   m_GameObject: {fileID: 597687745}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 116.581, y: 1.7317415, z: 51.231}
+  m_LocalPosition: {x: 117.34449, y: 1.7234958, z: 53.8302}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -52041,7 +52045,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestSpawner
   ShowTopMostFoldoutHeaderGroup: 1
-  prefabToSpawn: {fileID: 4573631869376184610, guid: 3aaf89b5645c16b42a4fa093c78bddf4, type: 3}
+  prefabToSpawn: {fileID: 1922910032675716625, guid: 753988128031c21469e76adaab8a326f, type: 3}
   autoCollectSpawnPoints: 1
   randomSpawnPoint: 0
   spawnPoints:
@@ -67826,7 +67830,7 @@ MonoBehaviour:
   selectionMode: 1
   useConnectionApprovalForSpawn: 1
   manualSpawnFallback: 0
-  playerPrefabOverride: {fileID: 2153596515888635933, guid: 52e61a01b58a98c0ab58b3ea3a006bf2, type: 3}
+  playerPrefabOverride: {fileID: 4492199999873088989, guid: 529155ec7c3e39e40853a7299a5f5a9c, type: 3}
   verboseLog: 1
 --- !u!114 &1061170330
 MonoBehaviour:
@@ -76999,7 +77003,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1219844041
 Transform:
   m_ObjectHideFlags: 0
@@ -99124,7 +99128,7 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
+  SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
