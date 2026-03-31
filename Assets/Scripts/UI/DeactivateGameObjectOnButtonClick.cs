@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.Netcode;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Button))]
 public class DeactivateGameObjectOnButtonClick : MonoBehaviour
 {
-    [SerializeField] private GameObject targetToDeactivate;
     [SerializeField] private KeyCode deactivateKey = KeyCode.L;
 
     private Button button;
@@ -34,14 +35,14 @@ public class DeactivateGameObjectOnButtonClick : MonoBehaviour
 
     private void HandleButtonClick()
     {
-        if (targetToDeactivate == null)
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
         {
-            Debug.LogWarning($"{nameof(DeactivateGameObjectOnButtonClick)} on {name} has no target assigned.", this);
-            return;
+            var activeSceneName = SceneManager.GetActiveScene().name;
+            NetworkManager.Singleton.SceneManager.LoadScene(activeSceneName, LoadSceneMode.Single);
         }
-
-        targetToDeactivate.SetActive(false);
+        else
+        {
+            Debug.LogWarning("Only the Host/Server can reset the game.");
+        }
     }
 }
-
-

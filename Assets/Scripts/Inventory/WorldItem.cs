@@ -63,6 +63,22 @@ namespace Inventory
             _startPosition = transform.position;
             if (highlightEffect != null)
                 _highlightDefaultScale = highlightEffect.transform.localScale;
+
+            // Delayed cleanup for ghost items on clients. If the host picked up an in-scene
+            // item before we joined, the server won't send a spawn message for it.
+            // So if it's still unspawned after a bit, it's a ghost and we destroy it.
+            Invoke(nameof(CheckGhostItemCleanup), 0.5f);
+        }
+
+        private void CheckGhostItemCleanup()
+        {
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+            {
+                if (!IsServer && !IsSpawned)
+                {
+                    Destroy(gameObject);
+                }
+            }
         }
 
         private void Update()
@@ -84,6 +100,9 @@ namespace Inventory
         public void Interact(GameObject interactor)
         {
             if (itemData == null) return;
+            
+            // Cannot interact with items that are missing their NetworkObject or aren't spawned
+            if (!TryGetComponent(out NetworkObject netObj) || !netObj.IsSpawned) return;
 
             PlayerInventory inventory = interactor != null
                 ? interactor.GetComponent<PlayerInventory>()

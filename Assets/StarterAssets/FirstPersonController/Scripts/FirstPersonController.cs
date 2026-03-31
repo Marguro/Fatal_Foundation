@@ -99,7 +99,10 @@ namespace StarterAssets.FirstPersonController.Scripts
 			get
 			{
 				#if ENABLE_INPUT_SYSTEM
-				return _playerInput.currentControlScheme == "KeyboardMouse";
+				// Default to true if currentControlScheme is null/empty (common in Netcode local client instances)
+				if (_playerInput != null && string.IsNullOrEmpty(_playerInput.currentControlScheme)) 
+					return true;
+				return _playerInput != null && _playerInput.currentControlScheme == "KeyboardMouse";
 				#else
 				return false;
 				#endif

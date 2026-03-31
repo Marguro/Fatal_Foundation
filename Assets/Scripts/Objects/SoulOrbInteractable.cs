@@ -25,8 +25,27 @@ namespace Objects
             }
         }
 
+        private void Start()
+        {
+            // Delayed cleanup for ghost items on clients.
+            Invoke(nameof(CheckGhostItemCleanup), 0.5f);
+        }
+
+        private void CheckGhostItemCleanup()
+        {
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+            {
+                if (!IsServer && !IsSpawned)
+                {
+                    Destroy(gameObject);
+                }
+            }
+        }
+
         public void Interact(GameObject interactor)
         {
+            if (!IsSpawned) return;
+
             if (!IsServer)
             {
                 // When a client interacts, send RPC to server to handle pickup

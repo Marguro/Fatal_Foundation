@@ -336,8 +336,8 @@ MonoBehaviour:
   chaseSpeed: 4
   patrolWaitTime: 5
   patrolPointReachedDistance: 0.5
-  visionRange: 5.2
-  visionAngle: 75
+  visionRange: 6.42
+  visionAngle: 100
   scanInterval: 0.2
   chaseDuration: 10
   attackRange: 1.11
