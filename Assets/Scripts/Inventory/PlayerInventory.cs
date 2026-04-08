@@ -43,6 +43,10 @@ namespace Inventory
         [SerializeField] private float weightMultiplier = 0.5f;
         [BoxGroup("Weight Settings")]
         [SerializeField] private float minMoveSpeed = 0.5f;
+        [BoxGroup("Weight Settings")]
+        [SerializeField] [Range(0f, 0.95f)] private float maxPenaltyPercent = 0.5f;
+        [BoxGroup("Weight Settings")]
+        [SerializeField] private bool enableWeightPenalty = true;
 
         [BoxGroup("Drop Settings")]
         [SerializeField] private float dropForwardDistance = 1.25f;
@@ -647,9 +651,23 @@ namespace Inventory
         private void ApplyWeightPenalty()
         {
             if (_fpsController == null) return;
-            float penalty = TotalWeight * weightMultiplier;
-            _fpsController.MoveSpeed   = Mathf.Max(minMoveSpeed, _baseMoveSpeed   - penalty);
-            _fpsController.SprintSpeed = Mathf.Max(minMoveSpeed, _baseSprintSpeed - penalty);
+
+            if (!enableWeightPenalty)
+            {
+                _fpsController.MoveSpeed = _baseMoveSpeed;
+                _fpsController.SprintSpeed = _baseSprintSpeed;
+                return;
+            }
+
+            float penalty = Mathf.Max(0f, TotalWeight * weightMultiplier);
+            float movePenaltyCap = _baseMoveSpeed * Mathf.Clamp01(maxPenaltyPercent);
+            float sprintPenaltyCap = _baseSprintSpeed * Mathf.Clamp01(maxPenaltyPercent);
+
+            float minWalkFloor = Mathf.Max(minMoveSpeed, _baseMoveSpeed * 0.4f);
+            float minSprintFloor = Mathf.Max(minMoveSpeed, _baseSprintSpeed * 0.45f);
+
+            _fpsController.MoveSpeed = Mathf.Max(minWalkFloor, _baseMoveSpeed - Mathf.Min(penalty, movePenaltyCap));
+            _fpsController.SprintSpeed = Mathf.Max(minSprintFloor, _baseSprintSpeed - Mathf.Min(penalty, sprintPenaltyCap));
         }
     }
 }

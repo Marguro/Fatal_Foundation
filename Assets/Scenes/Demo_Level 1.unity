@@ -26142,7 +26142,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &418220039
 Transform:
   m_ObjectHideFlags: 0
@@ -40638,7 +40638,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f3731bb5e1b46e2bc546a5443425fbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DeactivateGameObjectOnButtonClick
-  targetToDeactivate: {fileID: 1404992366}
   deactivateKey: 108
 --- !u!114 &615886629
 MonoBehaviour:

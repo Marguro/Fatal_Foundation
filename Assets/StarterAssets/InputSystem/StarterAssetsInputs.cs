@@ -14,6 +14,7 @@ namespace StarterAssets.InputSystem
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
+		public bool crouchToggle;
 
 		[Header("Mouse Cursor Settings")]
 		public bool cursorLocked = true;
@@ -72,8 +73,14 @@ namespace StarterAssets.InputSystem
 
 		public void CrouchInput(bool newCrouchState)
 		{
-			if (newCrouchState)
-				crouch = !crouch;
+			if (crouchToggle)
+			{
+				if (newCrouchState)
+					crouch = !crouch;
+				return;
+			}
+
+			crouch = newCrouchState;
 		}
 		
 		private void OnApplicationFocus(bool hasFocus)
